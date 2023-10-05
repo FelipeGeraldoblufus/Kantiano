@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+
 
 @Module({
   imports: [UsersModule,
@@ -17,9 +19,8 @@ import { AuthModule } from './auth/auth.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
-    AuthModule
-  
-  
+    AuthModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
