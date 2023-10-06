@@ -86,17 +86,17 @@ export class AuthService {
 
       }*/
 
-      async resetPassword({id, password, newpassword}: ResetPassDto) {
+      async resetPassword({email}: ResetPassDto) {
         // Verifica la contraseña antigua proporcionada utilizando el método findOneByPass del UsersService
-        const user = await this.usersService.findOneByPass(password);
+        const user = await this.usersService.findOneByEmail(email);
       
         if (!user) {
-          throw new BadRequestException('Contraseña antigua incorrecta');
+          throw new BadRequestException('Email incorrecto');
         }
       
         // Utiliza el método del UsersService para actualizar la contraseña
         try {
-          await this.usersService.updatePassword(id, newpassword);
+          await this.usersService.updatePassword(email);
         } catch (error) {
           // Maneja cualquier error que pueda ocurrir durante la actualización de contraseña
           throw new BadRequestException('Error al actualizar la contraseña');

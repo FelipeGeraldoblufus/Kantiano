@@ -50,48 +50,63 @@ export class UsersService {
     return await this.userRepository.findOne({ where: { id } });
   }
 
-  async resetPassword(tempPassword: string, resetPassDto: ResetPassDto): Promise<void> {
-    const { newpassword } = resetPassDto;
 
-    // Busca al usuario por su contraseña temporal en lugar del ID
-    const user = await this.userRepository.findOneBy({ password: tempPassword });
-
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    // Actualiza el campo de contraseña con la nueva contraseña sin encriptar
-    user.password = newpassword;
-    await this.userRepository.save(user);
-  }
-
-
-  async updatePassword(id: number, newPassword: string): Promise<{ message: string }>  {
-    // Busca al usuario por su ID
-    const user = await this.userRepository.findOneBy({id});
-  
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-  
-    // Actualiza el campo de contraseña con la nueva contraseña
-    user.password = newPassword;
-    
-    // Guarda los cambios en la base de datos
-    await this.userRepository.save(user);
-    // Envía el correo electrónico después de actualizar la contraseña
-    await this.mailerService.sendEmail(id, "Actualización de contraseña", 'Su contraseña ha sido actualizada con éxito.');
-
-
-    return { message: 'Contraseña actualizada exitosamente.' };
-
-    
-  }
+ 
   
   
+
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+
+
+  async updatePassword(email: string): Promise<{ message: string }> {
+    // Busca al usuario por su ID
+    const user = await this.userRepository.findOneBy({ email });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    // Genera una contraseña aleatoria
+    const newPassword = this.generateRandomPassword();
+
+    // Actualiza el campo de contraseña con la nueva contraseña
+    user.password = newPassword;
+
+    // Guarda los cambios en la base de datos
+    await this.userRepository.save(user);
+
+    // Envía el correo electrónico después de actualizar la contraseña
+    await this.mailerService.sendEmail(email, "Actualización de contraseña", newPassword);
+
+    return { message: 'Contraseña actualizada exitosamente.' };
+  }
+
+  // Función para generar una contraseña aleatoria
+  private generateRandomPassword(length: number = 12): string {
+    const caracteresPermitidos = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let newPassword = "";
+
+    for (let i = 0; i < length; i++) {
+      const indiceAleatorio = Math.floor(Math.random() * caracteresPermitidos.length);
+      newPassword += caracteresPermitidos.charAt(indiceAleatorio);
+    }
+
+    return newPassword;
+  }
+
+
+
+
+
+
+
+
+
+
+
 }
 
  

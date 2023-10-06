@@ -22,11 +22,10 @@ export class MailerService {
     });
   }
 
-  async sendEmail(userId: number, subject: string, text: string): Promise<void> {
-    const usuario = await this.usuarioRepository.findOneBy({id: userId});
+  async sendEmail(email: string, subject: string, text: string): Promise<void> {
+    const usuario = await this.usuarioRepository.findOneBy({email});
     
     if (usuario) {
-        const text = 'Usted realizó una cambio de contraseña\n\n';
         await this.transporter.sendMail({
             from: 'testingparago@gmail.com',
             to: usuario.email,
