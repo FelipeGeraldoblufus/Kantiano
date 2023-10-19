@@ -7,7 +7,7 @@ import * as bcryptjs from "bcryptjs";
 import { LoginDto } from './dot/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ResetPassDto } from './dot/resetPass.dto';
-
+import { EditDto } from './dot/editperfil.dto';
 
 
 @Injectable()
@@ -19,6 +19,29 @@ export class AuthService {
         
         
         ) {}
+
+
+
+
+    async editarPerfil(userId: number, editDto: EditDto) {
+    // Utiliza el userId y editDto para realizar la edición del perfil
+    // Por ejemplo, puedes actualizar los campos del perfil según editDto
+    const user = await this.usersService.findOneByID(userId);
+
+    if (!user) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
+    // Actualiza los campos del perfil según los datos proporcionados en editDto
+    user.name = editDto.name;
+    user.password = editDto.password;
+    // Actualiza otros campos del perfil según sea necesario
+    await this.usersService.updateUserProfile(user);
+    }
+
+
+
+
 
 
     async login({email, password}: LoginDto){

@@ -4,12 +4,25 @@ import { RegisterDto } from './dot/register.dto';
 import { LoginDto } from './dot/login.dto';
 import { AuthGuard } from './guard/auth.guard';
 import { ResetPassDto } from './dot/resetPass.dto';
+import { EditDto } from './dot/editperfil.dto';
 
 @Controller('auth')
 export class AuthController {
 
-    constructor(private readonly authService: AuthService) {}
+    constructor(private readonly authService: AuthService
+        
+        ) {}
 
+
+    @Patch('editarperfil')
+    @UseGuards(AuthGuard)
+    editarPerfil(@Request() req, @Body() editDto: EditDto) {
+      const userId = req.user.id;
+      // Utiliza directamente el userId para realizar la edición del perfil
+      this.authService.editarPerfil(userId, editDto);
+      // Puedes devolver una respuesta de éxito u otro resultado adecuado
+      return { message: 'Perfil actualizado exitosamente' };
+    }
 
     @Post("register")
     register(

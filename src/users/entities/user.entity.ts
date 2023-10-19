@@ -1,4 +1,5 @@
-import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Equipo } from "src/teams/entities/team.entity";
+import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
@@ -15,6 +16,9 @@ export class User {
 
     @Column({ nullable: false })
     password: string;
+    
+    @OneToMany(() => Equipo, equipo => equipo.miembros)
+    equiposCreados: Equipo[];
 
     @Column({ default: "user" })
     rol: string;

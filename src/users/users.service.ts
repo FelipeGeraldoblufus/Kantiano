@@ -83,6 +83,15 @@ export class UsersService {
 
     return { message: 'Contraseña actualizada exitosamente.' };
   }
+  async updateUserProfile(user: User) {
+    try {
+      // Actualiza el perfil del usuario en la base de datos
+      await this.userRepository.save(user);
+    } catch (error) {
+      // Maneja cualquier error que pueda ocurrir durante la actualización del perfil
+      throw new Error('Error al actualizar el perfil del usuario');
+    }
+  }
 
   // Función para generar una contraseña aleatoria
   private generateRandomPassword(length: number = 12): string {

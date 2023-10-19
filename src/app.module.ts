@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { TeamsModule } from './teams/teams.module';
 
 
 @Module({
@@ -21,6 +22,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
     AuthModule,
     MailerModule,
+    TeamsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
