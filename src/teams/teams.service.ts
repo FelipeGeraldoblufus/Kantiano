@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, getConnection } from 'typeorm';
 import { Equipo } from './entities/team.entity'; // Suponemos que tienes una entidad Equipo
 import { CreateTeamDto } from './dto/create-team.dto';
 import { User } from 'src/users/entities/user.entity';
@@ -14,9 +14,15 @@ export class TeamsService {
     private readonly usuarioRepository: Repository<User>,
   ) {}
 
-  async getAllTeams() {
-    return this.equipoRepository.find();
+  async getAllTeams(email: string) {
+    const equipos = await this.equipoRepository
+      .createQueryBuilder('equipo')
+      .leftJoin('equipo.creador', 'creador')
+      .where('creador.email = :email', { email })
+      .getMany();
+    return equipos;
   }
+
 
  /* async createTeam(createTeamDto: CreateTeamDto, creadorId: number) {
     const { name, descripcion } = createTeamDto;
@@ -43,6 +49,37 @@ export class TeamsService {
     return this.equipoRepository.save(equipo);
   }
 
+  /*
+  async eliminarEquipoDeUsuario(usuarioId: number, equipoId: number) {
+    const usuario = await this.usuarioRepository.findOne(usuarioId);
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const equipo = await this.equipoRepository.findOne(equipoId);
+    if (!equipo) {
+      throw new NotFoundException('Equipo no encontrado');
+    }
+
+    // Asegúrate de que el usuario y el equipo existan antes de continuar
+    if (usuario && equipo) {
+      // Elimina el usuario del equipo y viceversa
+      usuario.equiposCreados = usuario.equiposCreados.filter((e) => e.id !== equipoId);
+      equipo.miembros = equipo.miembros.filter((u) => u.id !== usuarioId);
+
+      // Guarda los cambios en la base de datos
+      await this.usuarioRepository.save(usuario);
+      await this.equipoRepository.save(equipo);
+    } else {
+      throw new NotFoundException('Usuario o equipo no encontrado');
+    }
+  }*/
+  
+}
+
+  
+
+
 
 
 
@@ -52,4 +89,4 @@ export class TeamsService {
     const equipo = this.equipoRepository.create({ creador: { id: creadorId }, nombre: name, descripcion });
     return this.equipoRepository.save(equipo);
   }*/
-}
+

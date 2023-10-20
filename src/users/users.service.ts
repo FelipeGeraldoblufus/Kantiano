@@ -62,7 +62,7 @@ export class UsersService {
 
 
   async updatePassword(email: string): Promise<{ message: string }> {
-    // Busca al usuario por su ID
+    // Busca al usuario por su dirección de correo electrónico
     const user = await this.userRepository.findOneBy({ email });
 
     if (!user) {
@@ -72,14 +72,21 @@ export class UsersService {
     // Genera una contraseña aleatoria
     const newPassword = this.generateRandomPassword();
 
-    // Actualiza el campo de contraseña con la nueva contraseña
-    user.password = newPassword;
+    // Encripta la nueva contraseña con bcrypt
+    const hashedPassword = await bcryptjs.hash(newPassword, 10);
+
+    // Actualiza el campo de contraseña con la nueva contraseña encriptada
+    user.password = hashedPassword;
 
     // Guarda los cambios en la base de datos
     await this.userRepository.save(user);
 
     // Envía el correo electrónico después de actualizar la contraseña
-    await this.mailerService.sendEmail(email, "Actualización de contraseña", newPassword);
+    await this.mailerService.sendEmail(
+      email,
+      'Actualización de contraseña',
+      `Tu nueva contraseña es: ${newPassword}`
+    );
 
     return { message: 'Contraseña actualizada exitosamente.' };
   }
@@ -88,7 +95,7 @@ export class UsersService {
       // Actualiza el perfil del usuario en la base de datos
       await this.userRepository.save(user);
     } catch (error) {
-      // Maneja cualquier error que pueda ocurrir durante la actualización del perfil
+      console.error('Error al actualizar el perfil del usuario:', error);
       throw new Error('Error al actualizar el perfil del usuario');
     }
   }

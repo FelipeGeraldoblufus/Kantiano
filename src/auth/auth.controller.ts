@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards, Request, Patch, Param } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, Request, Patch, Param, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dot/register.dto';
 import { LoginDto } from './dot/login.dto';
@@ -17,12 +17,15 @@ export class AuthController {
     @Patch('editarperfil')
     @UseGuards(AuthGuard)
     editarPerfil(@Request() req, @Body() editDto: EditDto) {
-      const userId = req.user.id;
-      // Utiliza directamente el userId para realizar la edición del perfil
-      this.authService.editarPerfil(userId, editDto);
-      // Puedes devolver una respuesta de éxito u otro resultado adecuado
-      return { message: 'Perfil actualizado exitosamente' };
+    const userEmail = req.user.email; // Obtén el email del usuario autenticado desde el token
+    console.log('Usuario autenticado:', req.user.email);
+    // Busca al usuario por email en lugar de ID
+    this.authService.editarPerfil(userEmail, editDto);
+
+    return { message: 'Perfil actualizado exitosamente' };
     }
+    
+
 
     @Post("register")
     register(
