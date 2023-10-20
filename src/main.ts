@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as cors from 'cors'; // Importa el módulo cors
 
 async function bootstrap() {
   
@@ -17,6 +18,8 @@ async function bootstrap() {
 
 
   )
+  // Habilitar el middleware CORS
+  app.use(cors());
 
   await app.listen(3000);
 }

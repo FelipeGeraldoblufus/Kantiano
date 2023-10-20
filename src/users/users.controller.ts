@@ -10,7 +10,19 @@ export class UsersController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    return this.
+    usersService.create(createUserDto);
+  }
+
+  @Get(':id')
+  async getUserById(@Param('id') userId: number) {
+    const user = await this.usersService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return user;
   }
 
   @Get()

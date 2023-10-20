@@ -6,7 +6,7 @@ export class Equipo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true, nullable: false })
   nombre: string;
 
   @Column()

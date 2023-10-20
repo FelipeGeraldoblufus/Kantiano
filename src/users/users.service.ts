@@ -28,7 +28,14 @@ export class UsersService {
   create(createUserDto: CreateUserDto) {
     return this.userRepository.save(createUserDto);
   }
-
+  async getUserById(userId: number): Promise<User | undefined> {
+    try {
+      const user = await this.userRepository.findOne({where: {id: userId }});
+      return user;
+    } catch (error) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+  }
   
 
   findOneByEmail(email: string){
