@@ -6,6 +6,7 @@ import { CreateTeamDto } from './dto/create-team.dto';
 import { User } from 'src/users/entities/user.entity';
 import { AddUserTeamDto } from './dto/adduser-team.dto';
 import { EditTeamDto } from './dto/edit-team.dto';
+import { RemoveUserTeamDto } from './dto/removeUser.dto';
 
 @Injectable()
 export class TeamsService {
@@ -27,11 +28,6 @@ export class TeamsService {
   }
 
 
- /* async createTeam(createTeamDto: CreateTeamDto, creadorId: number) {
-    const { name, descripcion } = createTeamDto;
-    const equipo = this.equipoRepository.create({ creador: { id: creadorId }, nombre: name, descripcion: descripcion });
-    return this.equipoRepository.save(equipo);
-}*/
 
 async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number) {
   try {
@@ -117,38 +113,71 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
       throw new BadRequestException('No se pudo agregar al usuario al equipo', error.message);
     }
   }
-  
-  
-  
-  
-  
-  
+  async addMember(addUserDto: AddUserTeamDto) {
+    const { teamName, email } = addUserDto;
 
-  /*
-  async eliminarEquipoDeUsuario(email: string, equipoId: number) {
-    const usuario = await this.usuarioRepository.findOne({ where: { email: email } });
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
+    const team: Equipo = await this.equipoRepository.findOne({
+        where: { nombre: teamName },
+        relations: ['miembros', 'creador'], // Asegura que las relaciones estén cargadas
+    });
+
+    const user = await this.usuarioRepository.findOne({ where: { email } });
+
+    if (!team || !user) {
+        throw new Error('Equipo o usuario no encontrado');
     }
 
-    const equipo = await this.equipoRepository.findOne({ where: { id: equipoId }});
-    if (!equipo) {
+    // Verifica si el creador está definido y si ya está en la lista de miembros
+    const creadorEnLista = team?.creador?.id && team.miembros?.some((miembro) => miembro.id === team.creador.id);
+
+    if (!creadorEnLista && team?.creador) {
+        // Si el creador no está en la lista y está definido, agrégalo
+        team.miembros.push(team.creador);
+    }
+
+    // Verifica si el nuevo usuario ya está en la lista de miembros
+    const usuarioEnLista = user && team.miembros?.some((miembro) => miembro.id === user.id);
+
+    if (!usuarioEnLista && user) {
+        // Si el nuevo usuario no está en la lista y está definido, agrégalo
+        team.miembros.push(user);
+    }
+
+    return await this.equipoRepository.save(team);
+  }
+  
+  async removeMember(removeUserDto: RemoveUserTeamDto) {
+    const { teamId, email } = removeUserDto;
+
+    const team = await this.equipoRepository.findOne({
+      where: { id: teamId },
+      relations: ['miembros'],
+    });
+
+    if (!team) {
       throw new NotFoundException('Equipo no encontrado');
     }
 
-    // Asegúrate de que el usuario y el equipo existan antes de continuar
-    if (usuario && equipo) {
-      // Elimina el usuario del equipo y viceversa
-      usuario.equiposCreados = usuario.equiposCreados.filter((e) => e.id !== equipoId);
-      equipo.miembros = equipo.miembros.filter((u) => u.email !== email);
+    const user = await this.usuarioRepository.findOne({ where: { email } });
 
-      // Guarda los cambios en la base de datos
-      await this.usuarioRepository.save(usuario);
-      await this.equipoRepository.save(equipo);
-    } else {
-      throw new NotFoundException('Usuario o equipo no encontrado');
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
-  }*/
+
+    // Verifica si el usuario está en la lista de miembros
+    const usuarioEnListaIndex = user && team.miembros?.findIndex((miembro) => miembro.id === user.id);
+
+    if (usuarioEnListaIndex !== undefined && usuarioEnListaIndex !== -1) {
+      // Si el usuario está en la lista, elimínalo
+      team.miembros.splice(usuarioEnListaIndex, 1);
+      await this.equipoRepository.save(team);
+      return { message: 'Usuario removido exitosamente del equipo' };
+    } else {
+      throw new NotFoundException('Usuario no encontrado en la lista de miembros del equipo');
+    }
+  }
+
+ 
   async deleteTeamByName(name: string) {
     const team = await this.equipoRepository.findOne({ where: { nombre: name } });
     if (!team) {
@@ -179,14 +208,4 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
 
   
 
-
-
-
-
-
-  /*async createEquipo(creadorId: number, createTeamDto: CreateTeamDto) {
-    const { name, descripcion } = createTeamDto;
-    const equipo = this.equipoRepository.create({ creador: { id: creadorId }, nombre: name, descripcion });
-    return this.equipoRepository.save(equipo);
-  }*/
 

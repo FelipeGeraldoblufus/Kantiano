@@ -1,3 +1,5 @@
+import { Exclude } from "class-transformer";
+import { Proyecto } from "src/projects/entities/projects.entity";
 import { Equipo } from "src/teams/entities/team.entity";
 import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -16,9 +18,15 @@ export class User {
 
     @Column({ nullable: false })
     password: string;
+
     
+    @Exclude()
     @OneToMany(() => Equipo, equipo => equipo.miembros)
     equiposCreados: Equipo[];
+
+    @Exclude()
+    @OneToMany(() => Proyecto, proyecto => proyecto.creador)
+    proyectosCreados: Proyecto[];
 
     @Column({ default: "user" })
     rol: string;

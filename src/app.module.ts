@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { TeamsModule } from './teams/teams.module';
+import { ProyectosModule } from './projects/projects.module';
 
 
 @Module({
@@ -23,6 +24,7 @@ import { TeamsModule } from './teams/teams.module';
     AuthModule,
     MailerModule,
     TeamsModule,
+    ProyectosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

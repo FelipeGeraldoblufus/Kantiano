@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Equipo } from './entities/team.entity';
 import { EditTeamDto } from './dto/edit-team.dto';
+import { RemoveUserTeamDto } from './dto/removeUser.dto';
 
 @Controller('teams')
 export class TeamsController {
@@ -15,7 +16,7 @@ export class TeamsController {
     private equipoRepository: Repository<Equipo>,
     private readonly teamsService: TeamsService,) {}
   
-    @Get()
+    @Get('equipos')
     @UseGuards(AuthGuard)
     async getAllTeams(@Request() req) {
       // Obtén el email del usuario desde el token
@@ -90,17 +91,16 @@ export class TeamsController {
 
       return equipo;
     }
-    /*
-    @Delete('equipos/:equipoId/eliminar')
-    async eliminarEquipo(
-      @Request() req,
-      @Param('equipoId') equipoId: number,
-    ) {
-      const usuarioId = req.user.id; // Obtén el ID del usuario logeado desde el token
-      await this.teamsService.eliminarEquipoDeUsuario(usuarioId, equipoId);
-      return { message: 'Equipo eliminado del usuario' };
-    }*/
-
+    @UseGuards(AuthGuard)
+    @Post('addMember')
+    async addMember(@Body() addUserDto: AddUserTeamDto) {
+    return await this.teamsService.addMember(addUserDto);
+    }
+    @UseGuards(AuthGuard)
+    @Post('removemember')
+    async removeMember(@Body() removeUserDto: RemoveUserTeamDto) {
+    return this.teamsService.removeMember(removeUserDto);
+  }
 
 
 }
