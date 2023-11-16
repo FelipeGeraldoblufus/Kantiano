@@ -12,13 +12,13 @@ export class Proyecto {
   nombre: string;
 
   @Column()
-  descripcion: string;
+  descripcion?: string;
   
   
   @ManyToOne(() => User)
   creador: User;
 
-  
+
   @OneToMany(() => Equipo, equipo => equipo.proyecto)
   equipos: Equipo[];
 

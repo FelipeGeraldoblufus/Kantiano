@@ -1,7 +1,7 @@
-import { Exclude, Transform } from "class-transformer";
+import { Transform } from "class-transformer";
 import { IsOptional, IsString, MinLength } from "class-validator";
 
-export class CreateProjectDto {
+export class UpdateProjectDto  {
 
   @Transform(({ value }) => value.trim())
   @IsString()
@@ -9,7 +9,6 @@ export class CreateProjectDto {
   name: string;
 
   @IsString()
-  @IsOptional()
-  descripcion?: string;
+  descripcion: string;
 
 }
