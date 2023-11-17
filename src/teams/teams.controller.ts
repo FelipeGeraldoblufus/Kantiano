@@ -91,16 +91,19 @@ export class TeamsController {
 
       return equipo;
     }
-    @UseGuards(AuthGuard)
+    
     @Post('addMember')
-    async addMember(@Body() addUserDto: AddUserTeamDto) {
-    return await this.teamsService.addMember(addUserDto);
-    }
     @UseGuards(AuthGuard)
+    async addMember(@Request() req, @Body() addUserDto: AddUserTeamDto) {
+    const userId = req.user.id;
+    return await this.teamsService.addMember(userId, addUserDto);
+    }
+
     @Post('removemember')
+    @UseGuards(AuthGuard)
     async removeMember(@Body() removeUserDto: RemoveUserTeamDto) {
     return this.teamsService.removeMember(removeUserDto);
-  }
+    }
 
 
 }

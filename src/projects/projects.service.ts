@@ -21,18 +21,16 @@ export class ProyectosService {
   async findAll(): Promise<Proyecto[]> {
     return this.proyectoRepository.find();
   }
-  async getProjectsByUser(userId: number): Promise<Proyecto[]> {
-    const proyectos = await this.proyectoRepository.find({
-      where: { creador: { id: userId } },
-    });
 
-    if (!proyectos || proyectos.length === 0) {
-      throw new NotFoundException('No se encontraron proyectos para este usuario.');
-    }
-
-    return proyectos;
+  async getAllTeams(email: string) {
+    const proyecto = await this.proyectoRepository
+      .createQueryBuilder('proyecto')
+      .leftJoin('proyecto.creador', 'creador')
+      .where('creador.email = :email', { email })
+      .getMany();
+    return proyecto;
   }
- 
+
 
   async createProject(creadorId: number, name: string, description: string): Promise<Proyecto> {
     

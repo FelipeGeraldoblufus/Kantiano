@@ -113,40 +113,49 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
       throw new BadRequestException('No se pudo agregar al usuario al equipo', error.message);
     }
   }
-  async addMember(addUserDto: AddUserTeamDto) {
+  async addMember(userId: number, addUserDto: AddUserTeamDto) {
+    const usuario = await this.usuarioRepository.findOne({ where: { id: userId } });
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
     const { teamName, email } = addUserDto;
 
     const team: Equipo = await this.equipoRepository.findOne({
-        where: { nombre: teamName },
-        relations: ['miembros', 'creador'], // Asegura que las relaciones estén cargadas
+      where: { nombre: teamName },
+      relations: ['miembros', 'creador'],
     });
 
     const user = await this.usuarioRepository.findOne({ where: { email } });
 
     if (!team || !user) {
-        throw new Error('Equipo o usuario no encontrado');
+      throw new Error('Equipo o usuario no encontrado');
     }
 
     // Verifica si el creador está definido y si ya está en la lista de miembros
     const creadorEnLista = team?.creador?.id && team.miembros?.some((miembro) => miembro.id === team.creador.id);
 
     if (!creadorEnLista && team?.creador) {
-        // Si el creador no está en la lista y está definido, agrégalo
-        team.miembros.push(team.creador);
+      // Si el creador no está en la lista y está definido, agrégalo
+      team.miembros.push(team.creador);
     }
 
     // Verifica si el nuevo usuario ya está en la lista de miembros
     const usuarioEnLista = user && team.miembros?.some((miembro) => miembro.id === user.id);
 
     if (!usuarioEnLista && user) {
-        // Si el nuevo usuario no está en la lista y está definido, agrégalo
-        team.miembros.push(user);
+      // Si el nuevo usuario no está en la lista y está definido, agrégalo
+      team.miembros.push(user);
     }
 
     return await this.equipoRepository.save(team);
   }
   
   async removeMember(removeUserDto: RemoveUserTeamDto) {
+
+
+    
     const { teamId, email } = removeUserDto;
 
     const team = await this.equipoRepository.findOne({

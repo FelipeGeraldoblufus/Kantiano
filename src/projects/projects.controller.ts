@@ -1,26 +1,33 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Request, UseGuards, Patch, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Request, UseGuards, Patch, ParseIntPipe, NotFoundException } from '@nestjs/common';
 import { ProyectosService } from './projects.service';
 import { Proyecto } from './entities/projects.entity';
 import { CreateProjectDto } from './dto/create-projects';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { UpdateProjectDto } from './dto/update-project-dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Controller('proyectos')
 export class ProyectosController {
-  constructor(private readonly proyectosService: ProyectosService) {}
+  constructor(@InjectRepository(Proyecto)
+  private readonly proyectoRepository: Repository<Proyecto>, private readonly proyectosService: ProyectosService) {}
 
   @Get()
   findAll(): Promise<Proyecto[]> {
     return this.proyectosService.findAll();
   }
 
-  @Get()
+  @Get('misproyectos')
   @UseGuards(AuthGuard)
-  async getProjectsByUser(@Request() req) {
-    const userId = req.user.id;
-    return this.proyectosService.getProjectsByUser(userId);
-  }
+    async getAllTeams(@Request() req) {
+      // Obtén el email del usuario desde el token
+      const userEmail = req.user.email;
 
+      // Llama al servicio de equipos para obtener los equipos asociados con el email del usuario
+      const equipos = await this.proyectosService.getAllTeams(userEmail);
+
+      return equipos;
+  } 
   
   @Post('crearProyecto')
   @UseGuards(AuthGuard)
