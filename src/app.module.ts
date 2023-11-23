@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { TeamsModule } from './teams/teams.module';
 import { ProyectosModule } from './projects/projects.module';
+import { TaskModule } from './task/task.module';
 
 
 @Module({
@@ -25,6 +26,8 @@ import { ProyectosModule } from './projects/projects.module';
     MailerModule,
     TeamsModule,
     ProyectosModule,
+    TaskModule,
+   
   ],
   controllers: [AppController],
   providers: [AppService],

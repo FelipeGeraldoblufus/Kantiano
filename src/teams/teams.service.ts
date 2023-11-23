@@ -77,42 +77,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
 
     return this.equipoRepository.save(equipo);
   }
-  async addUserToTeamByEmail(userId: number, email: string, equipoId: number) {
-    try {
-      // Busca al usuario por ID
-      const usuario = await this.usuarioRepository.findOne({ where: { id: userId } });
-
-      if (!usuario) {
-        throw new NotFoundException('Usuario no encontrado');
-      }
-
-      // Verifica que el equipo existe
-      const equipo = await this.equipoRepository.findOne({ where: { id: equipoId } });
-
-      if (!equipo) {
-        throw new NotFoundException('Equipo no encontrado');
-      }
-
-      // Verifica que el usuario con el correo electrónico existe
-      const usuarioNuevo = await this.usuarioRepository.findOne({ where: { email } });
-
-      if (!usuarioNuevo) {
-        throw new NotFoundException('Usuario con este correo electrónico no encontrado');
-      }
-
-      // Verifica que equipo y equipo.miembros no sean undefined antes de usar "some"
-      if (equipo && equipo.miembros) {
-        if (!equipo.miembros.some((miembro) => miembro.id === usuarioNuevo.id)) {
-          equipo.miembros.push(usuarioNuevo);
-          await this.equipoRepository.save(equipo);
-        }
-      }
-      
-      return equipo;
-    } catch (error) {
-      throw new BadRequestException('No se pudo agregar al usuario al equipo', error.message);
-    }
-  }
+  
   async addMember(userId: number, addUserDto: AddUserTeamDto) {
     const usuario = await this.usuarioRepository.findOne({ where: { id: userId } });
 

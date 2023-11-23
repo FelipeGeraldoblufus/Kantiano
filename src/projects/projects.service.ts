@@ -6,6 +6,9 @@ import { User } from 'src/users/entities/user.entity';
 import { plainToClass } from 'class-transformer';
 import * as flatted from 'flatted';
 import { UpdateProjectDto } from './dto/update-project-dto';
+import { Equipo } from 'src/teams/entities/team.entity';
+import { AddTeamProjectDto } from './dto/add-teamproyect-dto';
+import { RemoveTeamProjectDto } from './dto/remove-teamprojects-dto';
 
 @Injectable()
 export class ProyectosService {
@@ -14,7 +17,8 @@ export class ProyectosService {
     private readonly proyectoRepository: Repository<Proyecto>,
     @InjectRepository(User) // Inyecta el repositorio de usuarios
     private readonly usuarioRepository: Repository<User>,
-  
+    @InjectRepository(Equipo)
+    private equipoRepository: Repository<Equipo>,
     
   ) {}
 
@@ -146,6 +150,70 @@ export class ProyectosService {
   
     return true;
   }
+
+
+  async addEquipoToProyecto(creadorId: number, addEquipoDto: AddTeamProjectDto): Promise<Proyecto> {
+    const { equipo, projectName } = addEquipoDto;
+
+    // Buscar el proyecto por el creador y el nombre
+    const proyecto = await this.proyectoRepository.findOne({
+      where: { creador: { id: creadorId }, nombre: projectName },
+      relations: ['creador', 'equipos'],
+    });
+
+    if (!proyecto) {
+      throw new NotFoundException('Proyecto no encontrado o no tienes permisos.');
+    }
+
+    // Buscar el equipo por el nombre
+    let equipoExistente = await this.equipoRepository.findOne({ where: { nombre: equipo } });
+
+    // Si no existe el equipo, créalo
+    if (!equipoExistente) {
+      throw new NotFoundException('Equipo no encontrado.');
+    }
+
+    // Asignar el equipo al proyecto
+    proyecto.equipos = proyecto.equipos || [];
+    proyecto.equipos.push(equipoExistente);
+
+    // Guardar los cambios en el proyecto
+    await this.proyectoRepository.save(proyecto);
+
+    // Devolver el proyecto actualizado
+    return proyecto;
+  }
+  async removeEquipoFromProyecto(creadorId: number, removeEquipoDto: RemoveTeamProjectDto): Promise<Proyecto> {
+    const { equipo, projectName } = removeEquipoDto;
+    console.log('Entrando a removeEquipoFromProyecto', { creadorId, removeEquipoDto });
+    // Buscar el proyecto por el creador y el nombre
+    const proyecto = await this.proyectoRepository.findOne({
+      where: { creador: { id: creadorId }, nombre: projectName },
+      relations: ['creador', 'equipos'],
+    });
+    console.log('Proyecto encontrado:', proyecto);
+    if (!proyecto) {
+      throw new NotFoundException('Proyecto "${projectName}" no encontrado o no tienes permisos.');
+    }
+
+    // Buscar el equipo por el nombre
+    const equipoExistente = await this.equipoRepository.findOne({ where: { nombre: equipo } });
+
+    if (!equipoExistente) {
+      throw new NotFoundException('Equipo no encontrado en el proyecto.');
+    }
+
+    // Remover el equipo del proyecto
+    proyecto.equipos = proyecto.equipos.filter((e) => e.id !== equipoExistente.id);
+
+    // Guardar los cambios en el proyecto
+    await this.proyectoRepository.save(proyecto);
+
+    // Devolver el proyecto actualizado
+    return proyecto;
+  }
+
+  
   
 
 

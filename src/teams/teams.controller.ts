@@ -27,6 +27,7 @@ export class TeamsController {
 
       return equipos;
     }
+    
     @Get(':id/miembros')
     async getMiembrosDeEquipo(@Param('id') id: number) {
       const equipo = await this.equipoRepository.createQueryBuilder('equipo')
@@ -40,11 +41,8 @@ export class TeamsController {
 
       return equipo.miembros;
     }
-        
-    /*@Post("crearteam")
-    createTeam(@Body() createTeamDto: CreateTeamDto) {
-      return this.teamsService.createTeam(createTeamDto);
-    }*/
+    
+
 
     @Patch('editarteam/:equipoId')
     @UseGuards(AuthGuard)
@@ -74,23 +72,6 @@ export class TeamsController {
     }
 
 
-    @Post(':equipoId/members')
-    @UseGuards(AuthGuard)
-    async addUserToTeam(
-      @Request() req,
-      @Body() addUserDto: AddUserTeamDto,
-      @Param('equipoId') equipoId: number,
-    ) {
-      const usuario = req.user; // El usuario autenticado
-
-      // Asegúrate de que el DTO tenga el campo "email"
-      const email = addUserDto.email;
-
-      // Llama al servicio para agregar al usuario al equipo
-      const equipo = await this.teamsService.addUserToTeamByEmail(usuario.id, email, equipoId);
-
-      return equipo;
-    }
     
     @Post('addMember')
     @UseGuards(AuthGuard)

@@ -6,6 +6,8 @@ import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { UpdateProjectDto } from './dto/update-project-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AddTeamProjectDto } from './dto/add-teamproyect-dto';
+import { RemoveTeamProjectDto } from './dto/remove-teamprojects-dto';
 
 @Controller('proyectos')
 export class ProyectosController {
@@ -52,6 +54,26 @@ export class ProyectosController {
     const userId = req.user.id;
     const result = await this.proyectosService.updateProject(userId, proyectoData, projectId);
     return { success: result };
+  }
+
+  @Post('addequipos')
+  @UseGuards(AuthGuard)
+  async addEquipoToProyecto(
+    @Request() req,
+    @Body() addEquipoDto: AddTeamProjectDto,
+  ){
+    const userId = req.user.id;
+    return this.proyectosService.addEquipoToProyecto(userId, addEquipoDto);
+  }
+
+  @Delete('removeequipo')
+  @UseGuards(AuthGuard)
+  async removeEquipoFromProyecto(
+    @Request() req,
+    @Body() removeEquipoDto: RemoveTeamProjectDto,
+  ) {
+    const userId = req.user.id;
+    return this.proyectosService.removeEquipoFromProyecto(userId, removeEquipoDto);
   }
         
 }

@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
 import { Equipo } from 'src/teams/entities/team.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Task } from 'src/task/entities/task.entity';
 
 
 @Entity()
@@ -21,5 +22,8 @@ export class Proyecto {
 
   @OneToMany(() => Equipo, equipo => equipo.proyecto)
   equipos: Equipo[];
+
+  @OneToMany(() => Task, tarea => tarea.proyecto) // Relación bidireccional
+  tareas: Task[];
 
 }
