@@ -10,6 +10,9 @@ export class Task {
 
   @Column()
   nombre: string;
+  
+  @Column()
+  descripcion: string;
 
   @ManyToOne(() => User, { nullable: false })
   creador: User;
