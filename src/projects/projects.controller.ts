@@ -30,6 +30,23 @@ export class ProyectosController {
 
       return equipos;
   } 
+
+  @Get(':nombre')
+  @UseGuards(AuthGuard)
+  async findByNombre(@Param('nombre') nombre: string, @Request() req): Promise<Proyecto | undefined> {
+    // Obtén el usuario autenticado desde el token
+    const usuario= req.user.email;
+
+    // Llama al servicio de proyectos para obtener el proyecto asociado al usuario autenticado y con el nombre dado
+    const proyectoEncontrado = await this.proyectosService.findByNombreYUsuario(nombre, usuario);
+
+    if (!proyectoEncontrado) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    return proyectoEncontrado;
+  }
+
   
   @Post('crearProyecto')
   @UseGuards(AuthGuard)

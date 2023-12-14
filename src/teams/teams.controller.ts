@@ -18,7 +18,7 @@ export class TeamsController {
   
     @Get('equipos')
     @UseGuards(AuthGuard)
-    async getAllTeams(@Request() req) {
+    async getAllTeams(@Request() req): Promise<Equipo[]> {
       // Obtén el email del usuario desde el token
       const userEmail = req.user.email;
 
@@ -46,28 +46,28 @@ export class TeamsController {
 
     @Patch('editarteam/:equipoId')
     @UseGuards(AuthGuard)
-    editarPerfil(@Request() req, @Body() editTeamDto: EditTeamDto, @Param('equipoId', ParseIntPipe) equipoId: number) {
+    editarPerfil(@Request() req, @Body() editTeamDto: EditTeamDto, @Param('equipoId', ParseIntPipe) equipoId: number): Promise<Equipo> {
       const userEmail = req.user.email; // Obtén el email del usuario autenticado desde el token
       console.log('Usuario autenticado:', req.user.email);
       
       // Llama a la función de edición del servicio
       const equipoActualizado = this.teamsService.editarEquipo(userEmail, editTeamDto, equipoId);
 
-      return { message: 'Equipo actualizado exitosamente', equipo: equipoActualizado };
+      return equipoActualizado;
     }
 
     
    
     @Post("crearTeam")
     @UseGuards(AuthGuard)
-    async createEquipo(@Request() req, @Body() createTeamDto: CreateTeamDto) {
+    async createEquipo(@Request() req, @Body() createTeamDto: CreateTeamDto): Promise<Equipo> {
         const userId = req.user.id;
         const { name, descripcion } = createTeamDto;
         const equipo = await this.teamsService.createTeam(userId, name, descripcion);
         return equipo;
     }
     @Delete(':name')
-    deleteTeamByName(@Param('name') name: string) {
+    deleteTeamByName(@Param('name') name: string): Promise<string> {
       return this.teamsService.deleteTeamByName(name);
     }
 
@@ -75,7 +75,7 @@ export class TeamsController {
     
     @Post('addMember')
     @UseGuards(AuthGuard)
-    async addMember(@Request() req, @Body() addUserDto: AddUserTeamDto) {
+    async addMember(@Request() req, @Body() addUserDto: AddUserTeamDto): Promise<Equipo> {
     const userId = req.user.id;
     return await this.teamsService.addMember(userId, addUserDto);
     }

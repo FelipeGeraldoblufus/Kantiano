@@ -21,14 +21,13 @@ export class User {
 
     
     @Exclude()
-    @OneToMany(() => Equipo, equipo => equipo.miembros)
     equiposCreados: Equipo[];
 
     @Exclude()
     @OneToMany(() => Proyecto, proyecto => proyecto.creador)
     proyectosCreados: Proyecto[];
 
-    @Column({ default: "user" })
+    @Column()
     rol: string;
 
     @DeleteDateColumn()

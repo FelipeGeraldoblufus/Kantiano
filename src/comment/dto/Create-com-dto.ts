@@ -1,12 +1,12 @@
-// edit-team.dto.ts
-
 import { IsString, MinLength } from 'class-validator';
 
-export class EditTeamDto {
+export class CreateComDto {
+    
   @IsString()
   @MinLength(4)
-  nombre: string;
-
+  Tarea: string;
+  
   @IsString()
-  descripcion: string;
+  Comentario: string
+
 }

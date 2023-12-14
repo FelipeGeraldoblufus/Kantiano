@@ -15,4 +15,8 @@ export class RegisterDto{
     @Transform(({value}) => value.trim()) //limpia caracteres en blanco
     @MinLength(6)
     password: string;
+
+    @IsString()
+    @Transform(({value}) => value.trim())
+    role: string
 }

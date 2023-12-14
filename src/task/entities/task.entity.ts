@@ -1,7 +1,10 @@
 import { Proyecto } from "src/projects/entities/projects.entity";
 import { Equipo } from "src/teams/entities/team.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { STATUS_TASK } from "../constants/status-task";
+import { Exclude } from "class-transformer";
+import { Comentario } from "src/comment/entities/com.entity";
 
 @Entity()
 export class Task {
@@ -23,7 +26,7 @@ export class Task {
   @ManyToOne(() => Proyecto, { nullable: false })
   proyecto: Proyecto;
 
-  @Column({ default: 'pendiente' }) 
+  @Column() 
   estado: string;
 
   @Column({ nullable: true })
@@ -34,6 +37,14 @@ export class Task {
 
   @Column({ default: false })
   eliminada: boolean;
+
+  @Exclude()
+  @OneToMany(() => Comentario, comment => comment.tarea)
+  comentarios: Comentario[];
+
+  
+
+
 
 
 }

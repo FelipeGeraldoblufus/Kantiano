@@ -35,6 +35,14 @@ export class ProyectosService {
     return proyecto;
   }
 
+  async findByNombreYUsuario(nombre: string, usuarioemail: string): Promise<Proyecto | undefined> {
+    return this.proyectoRepository.findOne({
+      where: { nombre, creador: { email: usuarioemail } },
+      relations: ['creador', 'equipos', 'tareas'],
+    });
+  }
+
+
 
   async createProject(creadorId: number, name: string, description: string): Promise<Proyecto> {
     

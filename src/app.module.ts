@@ -8,6 +8,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { TeamsModule } from './teams/teams.module';
 import { ProyectosModule } from './projects/projects.module';
 import { TaskModule } from './task/task.module';
+import { CommentModule } from './comment/com.module';
 
 
 @Module({
@@ -27,7 +28,8 @@ import { TaskModule } from './task/task.module';
     TeamsModule,
     ProyectosModule,
     TaskModule,
-   
+    CommentModule,
+  
   ],
   controllers: [AppController],
   providers: [AppService],

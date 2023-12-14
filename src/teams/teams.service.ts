@@ -18,7 +18,7 @@ export class TeamsService {
   
   ) {}
 
-  async getAllTeams(email: string) {
+  async getAllTeams(email: string): Promise<Equipo[]> {
     const equipos = await this.equipoRepository
       .createQueryBuilder('equipo')
       .leftJoin('equipo.creador', 'creador')
@@ -29,7 +29,7 @@ export class TeamsService {
 
 
 
-async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number) {
+async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number): Promise<Equipo> {
   try {
     // Busca al usuario por su correo electrónico
     const usuario = await this.usuarioRepository.findOne({ where: { email: userEmail } });
@@ -59,7 +59,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
 }
 
 
-  async createTeam(creadorId: number, name: string, description: string) {
+  async createTeam(creadorId: number, name: string, description: string): Promise<Equipo> {
     const creador = await this.usuarioRepository.findOne({
       where: { id: creadorId }, // Busca al usuario por su ID
     });
@@ -78,7 +78,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
     return this.equipoRepository.save(equipo);
   }
   
-  async addMember(userId: number, addUserDto: AddUserTeamDto) {
+  async addMember(userId: number, addUserDto: AddUserTeamDto): Promise<Equipo> {
     const usuario = await this.usuarioRepository.findOne({ where: { id: userId } });
 
     if (!usuario) {
@@ -152,7 +152,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
   }
 
  
-  async deleteTeamByName(name: string) {
+  async deleteTeamByName(name: string): Promise<string> {
     const team = await this.equipoRepository.findOne({ where: { nombre: name } });
     if (!team) {
       throw new NotFoundException('Team not found');

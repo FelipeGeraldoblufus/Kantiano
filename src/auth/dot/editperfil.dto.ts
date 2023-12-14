@@ -16,4 +16,13 @@ export class EditDto{
     password: string;
 
 
+
+    @IsString()
+    @Transform(({value}) => value.trim())
+    rol: string;
+
+
+
+
+
 }
