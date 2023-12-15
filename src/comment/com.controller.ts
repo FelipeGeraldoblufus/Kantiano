@@ -19,5 +19,3 @@ export class ComController {
     return this.commentService.createComment(createComDto, userId);
   }
 }
-
-  // Implementa otras rutas y operaciones CRUD para las tareas

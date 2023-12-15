@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards, Request, Patch, Param, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards, Request, Patch, Param, BadRequestException, NotFoundException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dot/register.dto';
 import { LoginDto } from './dot/login.dto';
@@ -20,9 +20,13 @@ export class AuthController {
     const userEmail = req.user.email; // Obtén el email del usuario autenticado desde el token
     console.log('Usuario autenticado:', req.user.email);
     // Busca al usuario por email en lugar de ID
-    this.authService.editarPerfil(userEmail, editDto);
+    try{
+        this.authService.editarPerfil(userEmail, editDto);
 
-    return { message: 'Perfil actualizado exitosamente' };
+        return { message: 'Perfil actualizado exitosamente' };
+    }catch (error) {
+        throw new NotFoundException(`No se pudieron editar el perfil del usuario`);
+      }
     }
     
 
@@ -33,7 +37,10 @@ export class AuthController {
         registerDto: RegisterDto
     ) {
         
-        return this.authService.register(registerDto);
+        try{return this.authService.register(registerDto);
+        }catch (error) {
+            throw new NotFoundException(`No se pudieron registrar el usuario`);
+          }
     }
 
 
@@ -43,7 +50,12 @@ export class AuthController {
         logindto: LoginDto, 
 
     ) {
-        return this.authService.login(logindto);
+        try{
+            return this.authService.login(logindto);
+
+        }catch (error) {
+            throw new NotFoundException(`Fallo al inicio de sesion`);
+          }
     }
 
     @Get("profile")
@@ -61,7 +73,10 @@ export class AuthController {
         @Body()
         resetpassdto :ResetPassDto,
     ) {
-        return this.authService.resetPassword(resetpassdto);
+        try{return this.authService.resetPassword(resetpassdto);
+        }catch (error) {
+            throw new NotFoundException(`Fallo al restaurar contraseña`);
+          }
     }
   }
 

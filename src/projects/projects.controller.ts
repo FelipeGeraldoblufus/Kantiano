@@ -37,7 +37,8 @@ export class ProyectosController {
     // Obtén el usuario autenticado desde el token
     const usuario= req.user.email;
 
-    // Llama al servicio de proyectos para obtener el proyecto asociado al usuario autenticado y con el nombre dado
+    try{
+      // Llama al servicio de proyectos para obtener el proyecto asociado al usuario autenticado y con el nombre dado
     const proyectoEncontrado = await this.proyectosService.findByNombreYUsuario(nombre, usuario);
 
     if (!proyectoEncontrado) {
@@ -45,6 +46,10 @@ export class ProyectosController {
     }
 
     return proyectoEncontrado;
+
+    }catch (error) {
+      throw new NotFoundException(`No se pudieron obtener el proyecto`);
+    }
   }
 
   
@@ -54,23 +59,35 @@ export class ProyectosController {
     const userId = req.user.id;
     console.log("controlador",userId)
     const { name, descripcion } = proyectoData;
-    const proyecto = await this.proyectosService.createProject(userId, name, descripcion);
-    return proyecto;
+    try{
+      const proyecto = await this.proyectosService.createProject(userId, name, descripcion);
+      return proyecto;
+    }catch (error) {
+      throw new NotFoundException(`No se pudo crear el proyecto`);
+    }
   }
   @Delete(':name')
   @UseGuards(AuthGuard)
   async delete(@Request() req, @Param('name') proyectoId: string) {
     const userId = req.user.id;
+    try{
     const result = await this.proyectosService.deleteProject(userId, proyectoId);
     return { success: result };
+    }catch (error) {
+      throw new NotFoundException(`No se pudo eliminar el proyecto`);
+    }
   }
 
   @Patch('editproject/:projectId')
   @UseGuards(AuthGuard)
   async update(@Request() req, @Param('projectId', ParseIntPipe) projectId: number, @Body() proyectoData: UpdateProjectDto) {
     const userId = req.user.id;
+    try{
     const result = await this.proyectosService.updateProject(userId, proyectoData, projectId);
     return { success: result };
+    }catch (error) {
+      throw new NotFoundException(`No se pudo editar el proyecto`);
+    }
   }
 
   @Post('addequipos')
@@ -80,7 +97,12 @@ export class ProyectosController {
     @Body() addEquipoDto: AddTeamProjectDto,
   ){
     const userId = req.user.id;
-    return this.proyectosService.addEquipoToProyecto(userId, addEquipoDto);
+    try{
+      return this.proyectosService.addEquipoToProyecto(userId, addEquipoDto);
+    }catch (error) {
+      throw new NotFoundException(`No se pudieron añadir equipos al proyecto`);
+    }
+
   }
 
   @Delete('removeequipo')
@@ -90,7 +112,12 @@ export class ProyectosController {
     @Body() removeEquipoDto: RemoveTeamProjectDto,
   ) {
     const userId = req.user.id;
-    return this.proyectosService.removeEquipoFromProyecto(userId, removeEquipoDto);
+    try{
+      return this.proyectosService.removeEquipoFromProyecto(userId, removeEquipoDto);
+
+    }catch (error) {
+      throw new NotFoundException(`No se pudieron eliminar equipos del proyecto`);
+    }
   }
         
 }

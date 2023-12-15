@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
@@ -7,6 +7,7 @@ import { Equipo } from 'src/teams/entities/team.entity';
 import { User } from 'src/users/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { STATUS_TASK } from './constants/status-task';
+import { EditTaskDto } from './dto/edit-task-dto';
 
 @Injectable()
 export class TaskService {
@@ -84,7 +85,48 @@ async getAllTasksByProjectId(projectId: number): Promise<Task[]> {
   });
 
   return tasks;
+  
 }
+async deleteTask(taskId: number): Promise<void> {
+  const task = await this.tareaRepository.findOne({
+    where: { id: taskId },
+    relations: ['comentarios'], // Especifica las relaciones que deseas cargar
+  });
+  if (!task) {
+    throw new NotFoundException(`No se encontró la tarea con ID ${taskId}`);
+  }
+
+  await this.tareaRepository.remove(task);
+}
+
+async editTask(userId: number, taskId: number, editTaskDto: EditTaskDto): Promise<Task> {
+  const task = await this.tareaRepository.findOne({
+    where: { id: taskId },
+    relations: ['creador'], // Especifica las relaciones que deseas cargar
+  });
+
+  if (!task) {
+    throw new NotFoundException(`No se encontró la tarea con ID ${taskId}`);
+  }
+
+  if (task.creador.id !== userId) {
+    throw new ForbiddenException('No tienes permisos para editar esta tarea');
+  }
+
+  if (editTaskDto.nombre) {
+    task.nombre = editTaskDto.nombre;
+  }
+
+  if (editTaskDto.estado) {
+    task.estado = editTaskDto.estado;
+  }
+
+  await this.tareaRepository.save(task);
+
+  return task;
+}
+
+
 
 
 

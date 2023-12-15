@@ -23,14 +23,21 @@ export class TeamsController {
       const userEmail = req.user.email;
 
       // Llama al servicio de equipos para obtener los equipos asociados con el email del usuario
-      const equipos = await this.teamsService.getAllTeams(userEmail);
+      try{
+        const equipos = await this.teamsService.getAllTeams(userEmail);
 
-      return equipos;
+        return equipos;
+      }
+      catch (error) {
+      throw new NotFoundException(`No se pudo obtener a los equipos`);
+    }
     }
     
     @Get(':id/miembros')
     async getMiembrosDeEquipo(@Param('id') id: number) {
-      const equipo = await this.equipoRepository.createQueryBuilder('equipo')
+      
+      try{
+        const equipo = await this.equipoRepository.createQueryBuilder('equipo')
       .leftJoinAndSelect('equipo.miembros', 'miembros')
       .where('equipo.id = :id', { id })
       .getOne();
@@ -40,6 +47,11 @@ export class TeamsController {
       }
 
       return equipo.miembros;
+        
+      }
+      catch (error) {
+      throw new NotFoundException(`No se pudo obtener al equipo`);
+    }
     }
     
 
@@ -50,10 +62,17 @@ export class TeamsController {
       const userEmail = req.user.email; // Obtén el email del usuario autenticado desde el token
       console.log('Usuario autenticado:', req.user.email);
       
-      // Llama a la función de edición del servicio
+      try{
+        // Llama a la función de edición del servicio
       const equipoActualizado = this.teamsService.editarEquipo(userEmail, editTeamDto, equipoId);
 
       return equipoActualizado;
+
+      }
+      catch (error) {
+        throw new NotFoundException(`No se pudo editar el equipo`);
+      }
+      
     }
 
     
@@ -62,9 +81,14 @@ export class TeamsController {
     @UseGuards(AuthGuard)
     async createEquipo(@Request() req, @Body() createTeamDto: CreateTeamDto): Promise<Equipo> {
         const userId = req.user.id;
-        const { name, descripcion } = createTeamDto;
-        const equipo = await this.teamsService.createTeam(userId, name, descripcion);
-        return equipo;
+        const { name, descripcion } = createTeamDto;   
+        try{
+          const equipo = await this.teamsService.createTeam(userId, name, descripcion);
+          return equipo;
+        }
+        catch (error) {
+          throw new NotFoundException(`No se pudo crear el equipo`);
+        }
     }
     @Delete(':name')
     deleteTeamByName(@Param('name') name: string): Promise<string> {
@@ -77,13 +101,23 @@ export class TeamsController {
     @UseGuards(AuthGuard)
     async addMember(@Request() req, @Body() addUserDto: AddUserTeamDto): Promise<Equipo> {
     const userId = req.user.id;
-    return await this.teamsService.addMember(userId, addUserDto);
+    try{
+      return await this.teamsService.addMember(userId, addUserDto);
+    }
+    catch (error) {
+      throw new NotFoundException(`No se pudo añadir un miembro al equipo`);
+    }
     }
 
     @Post('removemember')
     @UseGuards(AuthGuard)
     async removeMember(@Body() removeUserDto: RemoveUserTeamDto) {
-    return this.teamsService.removeMember(removeUserDto);
+      try{
+        return this.teamsService.removeMember(removeUserDto);
+      }
+      catch (error) {
+        throw new NotFoundException(`No se pudo remover un miembro al equipo`);
+      }
     }
 
 
