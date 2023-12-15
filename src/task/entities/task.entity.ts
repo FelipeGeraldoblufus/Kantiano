@@ -11,7 +11,7 @@ export class Task {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column( {unique: true} )
   nombre: string;
   
   @Column()
@@ -38,8 +38,8 @@ export class Task {
   @Column({ default: false })
   eliminada: boolean;
 
-  @Exclude()
-  @OneToMany(() => Comentario, comment => comment.tarea)
+
+  @OneToMany(() => Comentario, comment => comment.tarea, { cascade: true })
   comentarios: Comentario[];
 
   

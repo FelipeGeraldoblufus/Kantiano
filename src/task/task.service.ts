@@ -8,6 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { STATUS_TASK } from './constants/status-task';
 import { EditTaskDto } from './dto/edit-task-dto';
+import { Comentario } from 'src/comment/entities/com.entity';
 
 @Injectable()
 export class TaskService {
@@ -18,6 +19,9 @@ export class TaskService {
     private proyectoRepository: Repository<Proyecto>,
     @InjectRepository(Equipo)
     private equipoRepository: Repository<Equipo>,
+    @InjectRepository(Comentario)
+    private commentRepository: Repository<Comentario>,
+  
     @InjectRepository(User)
     private usuarioRepository: Repository<User>,
   ) {}
@@ -90,12 +94,18 @@ async getAllTasksByProjectId(projectId: number): Promise<Task[]> {
 async deleteTask(taskId: number): Promise<void> {
   const task = await this.tareaRepository.findOne({
     where: { id: taskId },
-    relations: ['comentarios'], // Especifica las relaciones que deseas cargar
+    relations: ['comentarios'],
   });
+
   if (!task) {
     throw new NotFoundException(`No se encontró la tarea con ID ${taskId}`);
   }
+   // Obtén todos los comentarios asociados a la tarea
+   const comentarios = task.comentarios || [];
 
+   // Elimina los comentarios
+   await this.commentRepository.remove(comentarios);
+  // Elimina la tarea
   await this.tareaRepository.remove(task);
 }
 
