@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { HorarioTrabajo } from 'src/comment/entities/horario.entity';
 import { Cita } from 'src/teams/entities/citas.entity';
-
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity()
-export class User {
+export class Profesional {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -20,18 +20,12 @@ export class User {
     apellido: string;
 
     @Column()
-    edad: number;
+    especialidad: string;
 
-    @Column()
-    direccion: string;
+    @OneToMany(() => HorarioTrabajo, horarioTrabajo => horarioTrabajo.profesional)
+    horariosTrabajo: HorarioTrabajo[];
 
-    @Column()
-    rut: string;
-
-    @Column()
-    seguroMedico: string;
-
-    @OneToMany(() => Cita, cita => cita.paciente)
+    @OneToMany(() => Cita, cita => cita.profesional)
     citas: Cita[];
 
     @Column()

@@ -41,7 +41,7 @@ export class AuthService {
     }*/
 
     async generateToken(user: User) {
-      const payload = { email: user.email, sub: user.id, name: user.name };
+      const payload = { email: user.email, sub: user.id, name: user.nombre };
       return this.jwtService.sign(payload);
     }
     
@@ -64,9 +64,9 @@ export class AuthService {
       }
     
       // Actualiza los campos del perfil según los datos proporcionados en editDto
-      user.name = editDto.name;
+      user.nombre = editDto.name;
       user.password = editDto.password;
-      user.rol = editDto.rol;
+      
       // Actualiza otros campos del perfil según sea necesario
     
       await this.usersService.updateUserProfile(user);
@@ -76,7 +76,7 @@ export class AuthService {
       return await bcryptjs.compare(password, hashedPassword);
     } 
 
-    async login({email, password}: LoginDto){
+    async login({email, password}: LoginDto){ //IMPORTANTE HACER IF DEL USUARIO ENCONTRADO PREGUNTANDOLE EL TIPO DE USUARIO
 
         const user = await this.usersService.findOneByEmail(email);
         if (!user){
@@ -96,7 +96,7 @@ export class AuthService {
         return {
             token,
             email: user.email,
-            name: user.name,
+            name: user.nombre,
 
         };
     }

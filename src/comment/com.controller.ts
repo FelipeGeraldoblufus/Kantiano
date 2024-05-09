@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Param, Get, Query, Delete, Request, UseGuards } from '@nestjs/common';
 import { CommentService } from './com.service';
-import { Comentario } from './entities/com.entity';
+import { Comentario } from './entities/horario.entity';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { CreateComDto } from './dto/Create-com-dto';
 import { User } from 'src/users/entities/user.entity';

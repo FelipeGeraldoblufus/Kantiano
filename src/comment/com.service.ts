@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Comentario } from './entities/com.entity';
+import { Comentario } from './entities/horario.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Task } from 'src/task/entities/task.entity';
 import { CreateComDto } from './dto/Create-com-dto';

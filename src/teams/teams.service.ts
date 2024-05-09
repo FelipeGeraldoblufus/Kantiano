@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getConnection, getRepository } from 'typeorm';
-import { Equipo } from './entities/team.entity'; // Suponemos que tienes una entidad Equipo
+import { Equipo } from './entities/citas.entity'; // Suponemos que tienes una entidad Equipo
 import { CreateTeamDto } from './dto/create-team.dto';
 import { User } from 'src/users/entities/user.entity';
 import { AddUserTeamDto } from './dto/adduser-team.dto';

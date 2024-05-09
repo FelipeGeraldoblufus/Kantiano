@@ -5,20 +5,20 @@ import { AuthGuard } from 'src/auth/guard/auth.guard';
 import { AddUserTeamDto } from './dto/adduser-team.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Equipo } from './entities/team.entity';
+import { Cita } from './entities/citas.entity';
 import { EditTeamDto } from './dto/edit-team.dto';
 import { RemoveUserTeamDto } from './dto/removeUser.dto';
 
 @Controller('teams')
 export class TeamsController {
     constructor(
-    @InjectRepository(Equipo)
-    private equipoRepository: Repository<Equipo>,
+    @InjectRepository(Cita)
+    private equipoRepository: Repository<Cita>,
     private readonly teamsService: TeamsService,) {}
   
     @Get('equipos')
     @UseGuards(AuthGuard)
-    async getAllTeams(@Request() req): Promise<Equipo[]> {
+    async getAllTeams(@Request() req): Promise<Cita[]> {
       // Obtén el email del usuario desde el token
       const userEmail = req.user.email;
 
@@ -46,7 +46,7 @@ export class TeamsController {
         throw new NotFoundException('Equipo no encontrado');
       }
 
-      return equipo.miembros;
+      return equipo.profesional;
         
       }
       catch (error) {
@@ -58,7 +58,7 @@ export class TeamsController {
 
     @Patch('editarteam/:equipoId')
     @UseGuards(AuthGuard)
-    editarPerfil(@Request() req, @Body() editTeamDto: EditTeamDto, @Param('equipoId', ParseIntPipe) equipoId: number): Promise<Equipo> {
+    editarPerfil(@Request() req, @Body() editTeamDto: EditTeamDto, @Param('equipoId', ParseIntPipe) equipoId: number): Promise<Cita> {
       const userEmail = req.user.email; // Obtén el email del usuario autenticado desde el token
       console.log('Usuario autenticado:', req.user.email);
       
@@ -79,7 +79,7 @@ export class TeamsController {
    
     @Post("crearTeam")
     @UseGuards(AuthGuard)
-    async createEquipo(@Request() req, @Body() createTeamDto: CreateTeamDto): Promise<Equipo> {
+    async createEquipo(@Request() req, @Body() createTeamDto: CreateTeamDto): Promise<Cita> {
         const userId = req.user.id;
         const { name, descripcion } = createTeamDto;   
         try{
@@ -99,7 +99,7 @@ export class TeamsController {
     
     @Post('addMember')
     @UseGuards(AuthGuard)
-    async addMember(@Request() req, @Body() addUserDto: AddUserTeamDto): Promise<Equipo> {
+    async addMember(@Request() req, @Body() addUserDto: AddUserTeamDto): Promise<Cita> {
     const userId = req.user.id;
     try{
       return await this.teamsService.addMember(userId, addUserDto);
