@@ -4,6 +4,9 @@ import { IsString, IsEmail, MinLength } from 'class-validator';
 export class RegisterSecretariaDto {
     @IsString()
     nombre: string;
+
+    @IsString()
+    apellido: string;
   
     @IsEmail()
     email: string;
@@ -18,6 +21,4 @@ export class RegisterSecretariaDto {
     // Atributos específicos de secretaria
     // Pueden ser añadidos en caso necesario
   }
-
-
 

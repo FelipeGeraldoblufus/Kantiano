@@ -9,13 +9,19 @@ import { JwtService } from '@nestjs/jwt';
 import { ResetPassDto } from './dot/resetPass.dto';
 import { EditDto } from './dot/editperfil.dto';
 import { User } from 'src/users/entities/user.entity';
+import { ProfesionalService } from 'src/profesional/prof.service';
+import { SecretariaService } from 'src/secretaria/secre.service';
+import { RegisterProfesionalDto } from './dot/registerMed.dto';
+import { RegisterSecretariaDto } from './dot/registerSec.dto';
 
 
 @Injectable()
 export class AuthService {
     //llama a los metodos del user
     constructor(private readonly usersService: UsersService,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,  
+        private readonly profesionalService: ProfesionalService, // Agregar el servicio de Profesional
+        private readonly secretariaService: SecretariaService // Agregar el servicio de Secretaria
         
         
         
@@ -101,7 +107,46 @@ export class AuthService {
         };
     }
 
-    async register({name, email, password, role}: RegisterDto){
+
+    async logindinamico({ email, password, userType }: LoginDto) {
+      let user;
+    
+      switch (userType) {
+        case 'paciente':
+          user = await this.usersService.findOneByEmail(email);
+          break;
+        case 'profesional':
+          user = await this.profesionalService.findOneByEmail(email);
+          break;
+        case 'secretaria':
+          user = await this.secretariaService.findOneByEmail(email);
+          break;
+        default:
+          throw new BadRequestException('Tipo de usuario inválido');
+      }
+    
+      if (!user) {
+        throw new UnauthorizedException("Email is wrong");
+      }
+    
+      const passwordMatch = await bcryptjs.compare(password, user.password);
+    
+      if (!passwordMatch) {
+        throw new UnauthorizedException('Password is wrong');
+      }
+    
+      const payload = { id: user.id, email: user.email };
+      const token = await this.jwtService.signAsync(payload);
+    
+      return {
+        token,
+        email: user.email,
+        name: user.nombre,
+        userType: user.userType
+      };
+    }
+
+    async register({nombre, email, password, apellido, edad,direccion, rut, seguroMedico}: RegisterDto){
 
         const user = await this.usersService.findOneByEmail(email);
         if (user){
@@ -112,12 +157,53 @@ export class AuthService {
         const hashedPassword = await bcryptjs.hash(password, 10);
 
         return await this.usersService.create({
-            name, 
-            email, 
-            password: hashedPassword,
-            rol: role
-            
+          nombre,
+          email,
+          password: hashedPassword,
+          tipoUsuario: 'paciente',
+          apellido,
+          edad,
+          direccion,
+          rut,
+          seguroMedico
         });
+    }
+
+    
+    async registerProfesional({ nombre, email, password, apellido, especialidad}: RegisterProfesionalDto) {
+      const user = await this.profesionalService.findOneByEmail(email);
+      if (user) {
+        throw new BadRequestException("User already exists");
+      }
+    
+      const hashedPassword = await bcryptjs.hash(password, 10);
+    
+      return await this.profesionalService.create({
+        nombre,
+        email,
+        password: hashedPassword,
+        apellido,
+        especialidad,
+        tipoUsuario: 'profesional'
+      });
+    }
+    
+    async registerSecretaria({ nombre,apellido, email, password, direccion}: RegisterSecretariaDto) {
+      const user = await this.secretariaService.findOneByEmail(email);
+      if (user) {
+        throw new BadRequestException("User already exists");
+      }
+    
+      const hashedPassword = await bcryptjs.hash(password, 10);
+    
+      return await this.secretariaService.create({
+        nombre,
+        apellido,
+        email,
+        password: hashedPassword,
+        direccion,
+        tipoUsuario: 'secretaria'
+      });
     }
 
 

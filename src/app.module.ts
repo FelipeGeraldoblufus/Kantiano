@@ -6,9 +6,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { TeamsModule } from './teams/teams.module';
-import { ProyectosModule } from './projects/projects.module';
-import { TaskModule } from './task/task.module';
 import { CommentModule } from './comment/com.module';
+import { ProfesionalModule } from './profesional/prof.module';
+import { SecretariaModule } from './secretaria/secre.module';
 
 
 @Module({
@@ -25,9 +25,9 @@ import { CommentModule } from './comment/com.module';
     }),
     AuthModule,
     MailerModule,
+    ProfesionalModule,
+    SecretariaModule,
     TeamsModule,
-    ProyectosModule,
-    TaskModule,
     CommentModule,
   
   ],

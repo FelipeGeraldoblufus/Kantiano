@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Exclude } from 'class-transformer';
-import { Profesional } from 'src/users/entities/medic.entity';
+import { Profesional } from 'src/profesional/entities/medic.entity';
 
 @Entity()
 export class Cita {

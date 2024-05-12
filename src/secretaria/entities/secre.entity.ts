@@ -7,7 +7,10 @@ export class Secretaria {
 
     @Column()
     nombre: string;
-    
+
+    @Column({ unique: true, nullable: false })
+    email: string;
+ 
     @Column({ nullable: false })
     password: string;
 

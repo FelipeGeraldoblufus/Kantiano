@@ -1,39 +1,30 @@
 import { Transform } from "class-transformer";
-import { IsEmail, IsNumber, IsString, MinLength } from "class-validator";
+import { IsEmail, IsString, MinLength } from "class-validator";
 
-export class CreateUserDto {
+export class CreateSecreDto {
     
     @Transform(({ value }) => value.trim())
     @IsString()
     @MinLength(1)
-    nombre?: string;
+    nombre: string;
 
     @IsEmail()
     email: string;
 
     @IsString()
-    @Transform(({ value }) => value.trim()) //limpia caracteres en blanco
+    @Transform(({ value }) => value.trim()) // Limpia caracteres en blanco
     @MinLength(6)
     password: string;
 
     @IsString()
     @Transform(({ value }) => value.trim())
-    tipoUsuario: string;
-
-    @Transform(({ value }) => value.trim())
     apellido: string;
-    
-    @IsNumber()
-    edad: number;
 
+    @IsString()
     @Transform(({ value }) => value.trim())
     direccion: string;
 
+    @IsString()
     @Transform(({ value }) => value.trim())
-    rut: string;
-
-    @Transform(({ value }) => value.trim())
-    seguroMedico: string;
+    tipoUsuario: string;
 }
-    
-

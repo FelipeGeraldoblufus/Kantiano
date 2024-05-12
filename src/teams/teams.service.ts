@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getConnection, getRepository } from 'typeorm';
-import { Equipo } from './entities/citas.entity'; // Suponemos que tienes una entidad Equipo
+import { Cita } from './entities/citas.entity'; // Suponemos que tienes una entidad Equipo
 import { CreateTeamDto } from './dto/create-team.dto';
 import { User } from 'src/users/entities/user.entity';
 import { AddUserTeamDto } from './dto/adduser-team.dto';
@@ -11,14 +11,14 @@ import { RemoveUserTeamDto } from './dto/removeUser.dto';
 @Injectable()
 export class TeamsService {
   constructor(
-    @InjectRepository(Equipo)
-    private readonly equipoRepository: Repository<Equipo>,
+    @InjectRepository(Cita)
+    private readonly equipoRepository: Repository<Cita>,
     @InjectRepository(User) // Inyecta el repositorio de usuarios
     private readonly usuarioRepository: Repository<User>,
   
   ) {}
 
-  async getAllTeams(email: string): Promise<Equipo[]> {
+  async getAllTeams(email: string): Promise<Cita[]> {
     const equipos = await this.equipoRepository
       .createQueryBuilder('equipo')
       .leftJoin('equipo.creador', 'creador')
@@ -29,7 +29,7 @@ export class TeamsService {
 
 
 
-async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number): Promise<Equipo> {
+async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number): Promise<Cita> {
   try {
     // Busca al usuario por su correo electrónico
     const usuario = await this.usuarioRepository.findOne({ where: { email: userEmail } });
@@ -59,7 +59,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
 }
 
 
-  async createTeam(creadorId: number, name: string, description: string): Promise<Equipo> {
+  async createTeam(creadorId: number, name: string, description: string): Promise<Cita> {
     const creador = await this.usuarioRepository.findOne({
       where: { id: creadorId }, // Busca al usuario por su ID
     });
@@ -78,7 +78,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
     return this.equipoRepository.save(equipo);
   }
   
-  async addMember(userId: number, addUserDto: AddUserTeamDto): Promise<Equipo> {
+  async addMember(userId: number, addUserDto: AddUserTeamDto): Promise<Cita> {
     const usuario = await this.usuarioRepository.findOne({ where: { id: userId } });
 
     if (!usuario) {
@@ -87,7 +87,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
 
     const { teamName, email } = addUserDto;
 
-    const team: Equipo = await this.equipoRepository.findOne({
+    const team: Cita = await this.equipoRepository.findOne({
       where: { nombre: teamName },
       relations: ['miembros', 'creador'],
     });

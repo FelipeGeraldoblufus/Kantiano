@@ -5,6 +5,8 @@ import { LoginDto } from './dot/login.dto';
 import { AuthGuard } from './guard/auth.guard';
 import { ResetPassDto } from './dot/resetPass.dto';
 import { EditDto } from './dot/editperfil.dto';
+import { RegisterProfesionalDto } from './dot/registerMed.dto';
+import { RegisterSecretariaDto } from './dot/registerSec.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -43,6 +45,30 @@ export class AuthController {
           }
     }
 
+    @Post("Mregister")
+    registerM(
+        @Body()
+        registerDto: RegisterProfesionalDto
+    ) {
+        
+        try{return this.authService.registerProfesional(registerDto);
+        }catch (error) {
+            throw new NotFoundException(`No se pudieron registrar el usuario`);
+          }
+    }
+
+    @Post("Sregister")
+    registerS(
+        @Body()
+        registerDto: RegisterSecretariaDto
+    ) {
+        
+        try{return this.authService.registerSecretaria(registerDto);
+        }catch (error) {
+            throw new NotFoundException(`No se pudieron registrar el usuario`);
+          }
+    }
+
 
     @Post("login")
     login(
@@ -52,6 +78,20 @@ export class AuthController {
     ) {
         try{
             return this.authService.login(logindto);
+
+        }catch (error) {
+            throw new NotFoundException(`Fallo al inicio de sesion`);
+          }
+    }
+
+    @Post("Dlogin")
+    dlogin(
+        @Body()
+        logindto: LoginDto, 
+
+    ) {
+        try{
+            return this.authService.logindinamico(logindto);
 
         }catch (error) {
             throw new NotFoundException(`Fallo al inicio de sesion`);
