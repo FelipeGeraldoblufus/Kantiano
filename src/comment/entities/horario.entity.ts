@@ -1,6 +1,6 @@
 
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Profesional } from 'src/users/entities/medic.entity';
+import { Profesional } from 'src/profesional/entities/medic.entity';
 @Entity()
 export class HorarioTrabajo {
     @PrimaryGeneratedColumn()

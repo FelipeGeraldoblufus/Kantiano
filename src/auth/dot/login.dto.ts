@@ -16,6 +16,5 @@ export class LoginDto{
     @IsString()
     userType: string;
 
-
-
+    
 }

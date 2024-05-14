@@ -15,7 +15,7 @@ export class TeamsController {
     @InjectRepository(Cita)
     private equipoRepository: Repository<Cita>,
     private readonly teamsService: TeamsService,) {}
-  
+  /*
     @Get('equipos')
     @UseGuards(AuthGuard)
     async getAllTeams(@Request() req): Promise<Cita[]> {
@@ -119,6 +119,6 @@ export class TeamsController {
         throw new NotFoundException(`No se pudo remover un miembro al equipo`);
       }
     }
-
+*/
 
 }

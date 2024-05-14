@@ -8,5 +8,7 @@ import { SecretariaService } from './secre.service';
   imports: [TypeOrmModule.forFeature([Secretaria])],
   controllers: [SecretariaController],
   providers: [SecretariaService],
+  exports: [SecretariaService],
+
 })
 export class SecretariaModule {}

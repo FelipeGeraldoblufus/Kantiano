@@ -28,7 +28,7 @@ export class TeamsService {
   }
 
 
-
+/*
 async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number): Promise<Cita> {
   try {
     // Busca al usuario por su correo electrónico
@@ -176,7 +176,7 @@ async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number
     return this.equipoRepository.findOneBy({ nombre })
   }
  
-  
+  */
   
 }
 

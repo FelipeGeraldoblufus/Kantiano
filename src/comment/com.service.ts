@@ -1,21 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Comentario } from './entities/horario.entity';
+import { HorarioTrabajo } from './entities/horario.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Task } from 'src/task/entities/task.entity';
+
 import { CreateComDto } from './dto/Create-com-dto';
 
 @Injectable()
 export class CommentService {
   constructor(
-    @InjectRepository(Comentario)
-    private readonly commentRepository: Repository<Comentario>,
+    @InjectRepository(HorarioTrabajo)
+    private readonly commentRepository: Repository<HorarioTrabajo>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Task)
-    private readonly taskRepository: Repository<Task>,
   ) {}
+  /*
   async createComment(createComDto: CreateComDto, userId: number): Promise<Comentario> {
     const { Tarea, Comentario } = createComDto;
 
@@ -45,6 +44,7 @@ export class CommentService {
 
     return this.commentRepository.save(nuevoComentario);
   }
+  */
 }
 
 

@@ -8,5 +8,6 @@ import { ProfesionalService } from './prof.service';
   imports: [TypeOrmModule.forFeature([Profesional])],
   controllers: [ProfesionalController],
   providers: [ProfesionalService],
+  exports: [ProfesionalService],
 })
 export class ProfesionalModule {}
