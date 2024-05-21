@@ -23,7 +23,7 @@ export class Cita {
   @ManyToOne(() => User, paciente => paciente.citas)
   paciente: User;
 
-  @ManyToOne(() => Profesional, profesional => profesional.citas)
+  @ManyToOne(() => Profesional)
   profesional: Profesional;
 }
   

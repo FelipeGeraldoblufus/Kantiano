@@ -30,6 +30,16 @@ export class SecretariaService {
     return this.secretariaRepository.findOneBy({ id })
   }
 
+  async updateSecreProfile(secre: Secretaria) {
+    try {
+      // Actualiza el perfil del usuario en la base de datos
+      await this.secretariaRepository.save(secre);
+    } catch (error) {
+      console.error('Error al actualizar el perfil del usuario:', error);
+      throw new Error('Error al actualizar el perfil del usuario');
+    }
+  }
+
   async getUserById(userId: number): Promise<Secretaria | undefined> {
     try {
       const user = await this.secretariaRepository.findOne({ where: { id: userId } });

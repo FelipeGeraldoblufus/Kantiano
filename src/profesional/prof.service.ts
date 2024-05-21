@@ -29,6 +29,16 @@ export class ProfesionalService {
     return this.profesionalRepository.findOneBy({ id })
   }
 
+  async updateProfProfile(prof: Profesional) {
+    try {
+      // Actualiza el perfil del usuario en la base de datos
+      await this.profesionalRepository.save(prof);
+    } catch (error) {
+      console.error('Error al actualizar el perfil del usuario:', error);
+      throw new Error('Error al actualizar el perfil del usuario');
+    }
+  }
+
   async getUserById(userId: number): Promise<Profesional | undefined> {
     try {
       const user = await this.profesionalRepository.findOne({where: {id: userId }});

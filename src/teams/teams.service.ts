@@ -7,26 +7,83 @@ import { User } from 'src/users/entities/user.entity';
 import { AddUserTeamDto } from './dto/adduser-team.dto';
 import { EditTeamDto } from './dto/edit-team.dto';
 import { RemoveUserTeamDto } from './dto/removeUser.dto';
+import { Profesional } from 'src/profesional/entities/medic.entity';
+import { AgendarCitaDto } from './dto/agendar-cita.dto';
 
 @Injectable()
 export class TeamsService {
   constructor(
     @InjectRepository(Cita)
-    private readonly equipoRepository: Repository<Cita>,
+    private readonly citaRepository: Repository<Cita>,
     @InjectRepository(User) // Inyecta el repositorio de usuarios
     private readonly usuarioRepository: Repository<User>,
+    @InjectRepository(Profesional)
+    private readonly profesionalRepository: Repository<Profesional>,
   
   ) {}
 
-  async getAllTeams(email: string): Promise<Cita[]> {
-    const equipos = await this.equipoRepository
-      .createQueryBuilder('equipo')
-      .leftJoin('equipo.creador', 'creador')
-      .where('creador.email = :email', { email })
-      .getMany();
-    return equipos;
-  }
+  async getAllCitas(email: string):  Promise<Cita[]> {
+    
+    const user = await this.usuarioRepository
+        .createQueryBuilder('user')
+      .leftJoinAndSelect('user.citas', 'cita')
+      .leftJoinAndSelect('cita.profesional', 'profesional')
+      .where('user.email = :email', { email })
+      .getOne();
+      if (user) {
+        return user.citas; // Retorna solo la propiedad 'citas' del usuario
+      } else {
+        return []; // Si el usuario no tiene citas, retornamos un array vacío
+      }
+}
 
+
+  async agendarCita(agendarCitaDto: AgendarCitaDto): Promise<Cita> { //AGENDAR ES PARA LA SECRETARIA
+        const nuevaCita = this.citaRepository.create(agendarCitaDto);
+        const paciente = await this.usuarioRepository.findOne({ where: { email: agendarCitaDto.pacienteEmail } });
+        const profesional = await this.profesionalRepository.findOne({ where: { email: agendarCitaDto.profesionalEmail } });
+
+        if (!paciente) {
+            throw new NotFoundException(`No se encontró ningún usuario con el correo electrónico ${agendarCitaDto.pacienteEmail}`);
+        }
+
+        if (!profesional) {
+            throw new NotFoundException(`No se encontró ningún profesional con el correo electrónico ${agendarCitaDto.profesionalEmail}`);
+        }
+
+        nuevaCita.paciente = paciente;
+        nuevaCita.profesional = profesional;
+
+        await this.citaRepository.save(nuevaCita);
+        paciente.citas.push(nuevaCita);
+        profesional.citas.push(nuevaCita);
+
+        await this.usuarioRepository.save(paciente);
+        await this.profesionalRepository.save(profesional);
+
+        return nuevaCita;
+    }
+  
+
+
+  /*async createTeam(creadorId: number, name: string, description: string): Promise<Cita> {
+    const creador = await this.usuarioRepository.findOne({
+      where: { id: creadorId }, // Busca al usuario por su ID
+    });
+
+    if (!creador) {
+      throw new Error('Usuario no encontrado'); // Puedes personalizar el mensaje de error
+    }
+
+    const equipo = this.equipoRepository.create({
+      creador: creador,
+      nombre: name,
+      descripcion: description,
+      miembros: [creador], // Agregar el creador a la lista de miembros
+    });
+
+    return this.equipoRepository.save(equipo);
+  }*/
 
 /*
 async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number): Promise<Cita> {

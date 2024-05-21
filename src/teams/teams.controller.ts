@@ -8,30 +8,70 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cita } from './entities/citas.entity';
 import { EditTeamDto } from './dto/edit-team.dto';
 import { RemoveUserTeamDto } from './dto/removeUser.dto';
+import { AgendarCitaDto } from './dto/agendar-cita.dto';
+import { SecretariaService } from 'src/secretaria/secre.service';
+import { User } from 'src/users/entities/user.entity';
 
-@Controller('teams')
+@Controller('citas')
 export class TeamsController {
     constructor(
     @InjectRepository(Cita)
     private equipoRepository: Repository<Cita>,
-    private readonly teamsService: TeamsService,) {}
-  /*
-    @Get('equipos')
+    private readonly teamsService: TeamsService,
+) {}
+
+
+@Get('todas')
+@UseGuards(AuthGuard)
+async getAllCitas(@Request() req): Promise<Cita[]> {
+    try {
+        // Obtén el email del usuario desde el token
+        const userEmail = req.user.email;
+
+        // Llama al servicio para obtener todas las citas asociadas con el email del usuario
+        const citas = await this.teamsService.getAllCitas(userEmail);
+        
+        return citas;
+    } catch (error) {
+        throw new NotFoundException('No se pudieron obtener las citas');
+    }
+}
+  
+    @Post('agendar')
     @UseGuards(AuthGuard)
-    async getAllTeams(@Request() req): Promise<Cita[]> {
-      // Obtén el email del usuario desde el token
-      const userEmail = req.user.email;
+    async agendarCita(@Body() agendarCitaDto: AgendarCitaDto): Promise<Cita> {
+        try {
+            // Llamar al servicio para agendar la cita
+            const nuevaCita = await this.teamsService.agendarCita(agendarCitaDto);
 
-      // Llama al servicio de equipos para obtener los equipos asociados con el email del usuario
-      try{
-        const equipos = await this.teamsService.getAllTeams(userEmail);
+            return nuevaCita;
+        } catch (error) {
+            throw new NotFoundException('No se pudo agendar la cita');
+        }
+    }
+       
 
-        return equipos;
-      }
-      catch (error) {
-      throw new NotFoundException(`No se pudo obtener a los equipos`);
+    
+
+    /*@Post("crearTeam")
+    @UseGuards(AuthGuard)
+    async createEquipo(@Request() req, @Body() createTeamDto: CreateTeamDto): Promise<Cita> {
+        const userId = req.user.id;
+        const { name, descripcion } = createTeamDto;   
+        try{
+          const equipo = await this.teamsService.createTeam(userId, name, descripcion);
+          return equipo;
+        }
+        catch (error) {
+          throw new NotFoundException(`No se pudo crear el equipo`);
+        }
     }
-    }
+    @Delete(':name')
+    deleteTeamByName(@Param('name') name: string): Promise<string> {
+      return this.teamsService.deleteTeamByName(name);
+    }*/
+  /*
+  
     
     @Get(':id/miembros')
     async getMiembrosDeEquipo(@Param('id') id: number) {
@@ -75,25 +115,6 @@ export class TeamsController {
       
     }
 
-    
-   
-    @Post("crearTeam")
-    @UseGuards(AuthGuard)
-    async createEquipo(@Request() req, @Body() createTeamDto: CreateTeamDto): Promise<Cita> {
-        const userId = req.user.id;
-        const { name, descripcion } = createTeamDto;   
-        try{
-          const equipo = await this.teamsService.createTeam(userId, name, descripcion);
-          return equipo;
-        }
-        catch (error) {
-          throw new NotFoundException(`No se pudo crear el equipo`);
-        }
-    }
-    @Delete(':name')
-    deleteTeamByName(@Param('name') name: string): Promise<string> {
-      return this.teamsService.deleteTeamByName(name);
-    }
 
 
     
@@ -120,5 +141,4 @@ export class TeamsController {
       }
     }
 */
-
-}
+  }

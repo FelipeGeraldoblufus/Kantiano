@@ -59,20 +59,47 @@ export class AuthService {
       if (!user) {
         throw new BadRequestException('Usuario no encontrado');
       }
-    
+
       // Verifica si la contraseña en editDto está encriptada
       const isPasswordHashed = await this.isPasswordHashed(editDto.password, user.password);
-    
+      
+      if (editDto.password) {
       // Si la contraseña no está encriptada, encripta la contraseña en editDto
       if (!isPasswordHashed) {
         const hashedPassword = await bcryptjs.hash(editDto.password, 10);
         editDto.password = hashedPassword;
       }
-    
-      // Actualiza los campos del perfil según los datos proporcionados en editDto
-      user.nombre = editDto.name;
       user.password = editDto.password;
-      
+      }
+      // Actualiza los campos del perfil según los datos proporcionados en editDto
+      if (editDto.nombre) {
+        user.nombre = editDto.nombre;
+      }
+  
+      if (editDto.apellido) {
+        user.apellido = editDto.apellido;
+      }
+  
+      if (editDto.edad !== undefined) {
+        user.edad = editDto.edad;
+      }
+  
+      if (editDto.direccion) {
+        user.direccion = editDto.direccion;
+      }
+  
+      if (editDto.rut) {
+        user.rut = editDto.rut;
+      }
+  
+      if (editDto.seguroMedico) {
+        user.seguroMedico = editDto.seguroMedico;
+      }
+
+      if (editDto.tipoUsuario) {
+        user.tipoUsuario = editDto.tipoUsuario;
+      }
+    
       // Actualiza otros campos del perfil según sea necesario
     
       await this.usersService.updateUserProfile(user);
@@ -135,14 +162,14 @@ export class AuthService {
         throw new UnauthorizedException('Password is wrong');
       }
     
-      const payload = { id: user.id, email: user.email };
+      const payload = { id: user.id, email: user.email};
       const token = await this.jwtService.signAsync(payload);
     
       return {
         token,
         email: user.email,
         name: user.nombre,
-        userType: user.userType
+        userType: user.tipoUsuario
       };
     }
 

@@ -8,7 +8,7 @@ import { EditDto } from './dot/editperfil.dto';
 import { RegisterProfesionalDto } from './dot/registerMed.dto';
 import { RegisterSecretariaDto } from './dot/registerSec.dto';
 
-@Controller('auth')
+@Controller('auth')  
 export class AuthController {
 
     constructor(private readonly authService: AuthService
@@ -31,7 +31,7 @@ export class AuthController {
       }
     }
     
-
+    
 
     @Post("register")
     register(
