@@ -1,7 +1,8 @@
+
 import { IsOptional, IsString, MinLength } from 'class-validator';
 
 
-export class EditProfesionalDto{
+export class EditSecretariaDTO {
     @IsOptional()
     @IsString()
     @MinLength(1)
@@ -14,13 +15,15 @@ export class EditProfesionalDto{
 
     @IsOptional()
     @IsString()
-    especialidad?: string;
+    @MinLength(1)
+    direccion?: string;
 
+    @IsOptional()
+    @IsString()
+    @MinLength(6)
+    password?: string;
+    
     @IsOptional()
     @IsString()
     tipoUsuario?: string;
-
-    @IsOptional()
-    @IsString()
-    email?: string;
 }

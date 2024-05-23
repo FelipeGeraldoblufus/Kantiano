@@ -20,4 +20,8 @@ export class UpdateProfesionalDto extends PartialType(EditProfesionalDto) {
     @IsOptional()
     @IsString()
     tipoUsuario?: string;
+
+    @IsOptional()
+    @IsString()
+    email?: string;
 }

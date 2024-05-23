@@ -1,7 +1,9 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { IsOptional, IsString, MinLength } from 'class-validator';
+import { EditSecretariaDTO } from 'src/auth/dot/editsecre.dto';
 
 
-export class EditProfesionalDto{
+export class UpdateSecretariaDto extends PartialType(EditSecretariaDTO) {
     @IsOptional()
     @IsString()
     @MinLength(1)
@@ -14,13 +16,15 @@ export class EditProfesionalDto{
 
     @IsOptional()
     @IsString()
-    especialidad?: string;
+    @MinLength(1)
+    direccion?: string;
 
+    @IsOptional()
+    @IsString()
+    @MinLength(6)
+    password?: string;
+    
     @IsOptional()
     @IsString()
     tipoUsuario?: string;
-
-    @IsOptional()
-    @IsString()
-    email?: string;
 }

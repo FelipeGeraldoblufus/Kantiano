@@ -7,6 +7,8 @@ import { ResetPassDto } from './dot/resetPass.dto';
 import { EditDto } from './dot/editperfil.dto';
 import { RegisterProfesionalDto } from './dot/registerMed.dto';
 import { RegisterSecretariaDto } from './dot/registerSec.dto';
+import { EditProfesionalDto } from './dot/editprof.dto';
+import { EditSecretariaDTO } from './dot/editsecre.dto';
 
 @Controller('auth')  
 export class AuthController {
@@ -30,7 +32,40 @@ export class AuthController {
         throw new NotFoundException(`No se pudieron editar el perfil del usuario`);
       }
     }
-    
+
+    @Patch('editarperfil/profesional')
+    @UseGuards(AuthGuard)
+    async editarPerfilProf(@Request() req, @Body() editDto: EditProfesionalDto) {
+      const userEmail = req.user.email; // Email del usuario autenticado
+      const userRole = req.user.tipoUsuario; // Tipo de usuario autenticado
+  
+      console.log('Usuario autenticado:', userEmail, 'Tipo de usuario:', userRole);
+  
+      if (userRole === 'secretaria' || req.user.email === userEmail) {
+        try {
+          await this.authService.editarPerfilProf(userEmail, editDto);
+          return { message: 'Perfil actualizado exitosamente' };
+        } catch (error) {
+          throw new BadRequestException(`No se pudo editar el perfil del profesional: ${error.message}`);
+        }
+      } else {
+        throw new NotFoundException('No tienes permiso para editar este perfil');
+      }
+    }
+
+    @Patch('editarperfil/secretaria')
+  @UseGuards(AuthGuard)
+  async editarPerfilSecre(@Request() req, @Body() editDto: EditSecretariaDTO) {
+    const userEmail = req.user.email; // Email del usuario autenticado
+    console.log('Usuario autenticado:', userEmail);
+
+    try {
+      await this.authService.editarPerfilSecre(userEmail, editDto);
+      return { message: 'Perfil actualizado exitosamente' };
+    } catch (error) {
+      throw new NotFoundException(`No se pudo editar el perfil de la secretaria: ${error.message}`);
+    }
+  }
     
 
     @Post("register")

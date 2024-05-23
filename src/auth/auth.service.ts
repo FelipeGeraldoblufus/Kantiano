@@ -13,6 +13,8 @@ import { ProfesionalService } from 'src/profesional/prof.service';
 import { SecretariaService } from 'src/secretaria/secre.service';
 import { RegisterProfesionalDto } from './dot/registerMed.dto';
 import { RegisterSecretariaDto } from './dot/registerSec.dto';
+import { EditSecretariaDTO } from './dot/editsecre.dto';
+import { EditProfesionalDto } from './dot/editprof.dto';
 
 
 @Injectable()
@@ -104,6 +106,72 @@ export class AuthService {
     
       await this.usersService.updateUserProfile(user);
     }
+
+    async editarPerfilProf(email: string, editDto: EditProfesionalDto) {
+      const prof = await this.profesionalService.findOneByEmail(email);
+  
+      if (!prof) {
+        throw new BadRequestException('Profesional no encontrado');
+      }
+  
+      if (editDto.nombre) {
+        prof.nombre = editDto.nombre;
+      }
+  
+      if (editDto.apellido) {
+        prof.apellido = editDto.apellido;
+      }
+  
+      if (editDto.especialidad) {
+        prof.especialidad = editDto.especialidad;
+      }
+  
+      if (editDto.tipoUsuario) {
+        prof.tipoUsuario = editDto.tipoUsuario;
+      }
+  
+      await this.profesionalService.updateProfProfile(prof);
+    }
+  
+
+    async editarPerfilSecre(email: string, editDto: EditSecretariaDTO) {
+      const secretaria = await this.secretariaService.findOneByEmail(email);
+  
+      if (!secretaria) {
+        throw new BadRequestException('Secretaria no encontrada');
+      }
+  
+      if (editDto.password) {
+        const isPasswordHashed = await bcryptjs.compare(editDto.password, secretaria.password);
+        if (!isPasswordHashed) {
+          const hashedPassword = await bcryptjs.hash(editDto.password, 10);
+          editDto.password = hashedPassword;
+        }
+        secretaria.password = editDto.password;
+      }
+  
+      if (editDto.nombre) {
+        secretaria.nombre = editDto.nombre;
+      }
+  
+      if (editDto.apellido) {
+        secretaria.apellido = editDto.apellido;
+      }
+  
+      if (editDto.direccion) {
+        secretaria.direccion = editDto.direccion;
+      }
+  
+      if (editDto.tipoUsuario) {
+        secretaria.tipoUsuario = editDto.tipoUsuario;
+      }
+  
+      await this.secretariaService.updateSecreProfile(secretaria);
+    }
+  
+  
+
+
     
     private async isPasswordHashed(password: string, hashedPassword: string): Promise<boolean> {
       return await bcryptjs.compare(password, hashedPassword);
