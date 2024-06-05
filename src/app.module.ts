@@ -9,6 +9,7 @@ import { TeamsModule } from './teams/teams.module';
 import { CommentModule } from './comment/com.module';
 import { ProfesionalModule } from './profesional/prof.module';
 import { SecretariaModule } from './secretaria/secre.module';
+import { DiaNoDisponibleModule } from './Daysnot/day.module';
 
 
 @Module({
@@ -29,6 +30,8 @@ import { SecretariaModule } from './secretaria/secre.module';
     SecretariaModule,
     TeamsModule,
     CommentModule,
+    DiaNoDisponibleModule,
+    
   
   ],
   controllers: [AppController],
