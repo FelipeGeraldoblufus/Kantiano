@@ -9,7 +9,7 @@ export class Cita {
   id: number;
 
   @Column()
-  fecha: Date;
+  fecha: string;
 
   @Column()
   hora: string;

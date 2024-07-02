@@ -2,7 +2,7 @@ import { IsDate, IsString, IsEmail, IsDateString } from 'class-validator';
 
 export class AgendarCitaDto {
     @IsDateString()
-    fecha: string | Date;
+    fecha: string;
 
     @IsString()
     hora: string;

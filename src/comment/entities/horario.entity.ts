@@ -1,20 +1,20 @@
-
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Profesional } from 'src/profesional/entities/medic.entity';
+
 @Entity()
 export class HorarioTrabajo {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    diaSemana: string;
+  @Column()
+  fecha: string; 
 
-    @Column()
-    horaInicio: string;
+  @Column()
+  horaInicio: string; // Formato "HH:mm"
 
-    @Column()
-    horaFin: string;
+  @Column()
+  horaFin: string; // Formato "HH:mm"
 
-    @ManyToOne(() => Profesional, profesional => profesional.horariosTrabajo)
-    profesional: Profesional;
+  @ManyToOne(() => Profesional, profesional => profesional.horariosTrabajo)
+  profesional: Profesional;
 }

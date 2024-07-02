@@ -7,7 +7,7 @@ export class DiaNoDisponible {
   id: number;
 
   @Column()
-  fecha: Date;
+  fecha: string;
 
   @Column()
   motivo: string;

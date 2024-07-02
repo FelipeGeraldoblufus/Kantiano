@@ -7,10 +7,13 @@ import { Cita } from './entities/citas.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Profesional } from 'src/profesional/entities/medic.entity';
 import { Secretaria } from 'src/secretaria/entities/secre.entity';
+import { DiaNoDisponible } from 'src/Daysnot/entities/day.entity';
+import { HorarioTrabajo } from 'src/comment/entities/horario.entity';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Cita, User, Profesional, Secretaria])],
+    TypeOrmModule.forFeature([Cita, User, Profesional, Secretaria, DiaNoDisponible, HorarioTrabajo])],
   providers: [TeamsService],
   controllers: [TeamsController]
 })

@@ -3,7 +3,7 @@ import { IsDate, IsNotEmpty, IsString } from 'class-validator';
 export class CreateDiaNoDisponibleDto {
   @IsNotEmpty()
   @IsDate()
-  fecha: Date;
+  fecha: string;
 
   @IsNotEmpty()
   @IsString()

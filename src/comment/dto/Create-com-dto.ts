@@ -1,12 +1,19 @@
-import { IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class CreateComDto {
-    
+export class CreateHorarioTrabajoDto {
+  @IsNotEmpty()
   @IsString()
-  @MinLength(4)
-  Tarea: string;
+  fecha: string;
+
+  @IsNotEmpty()
+  @IsString()
+  horaInicio: string;
+
+  @IsNotEmpty()
+  @IsString()
+  horaFin: string;
   
-  @IsString()
-  Comentario: string
-
+  @IsNotEmpty()
+  @IsEmail()
+  emailDoctor: string; 
 }

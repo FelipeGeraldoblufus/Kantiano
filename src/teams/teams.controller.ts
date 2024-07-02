@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Request, UseGuards } from '@nestjs/common';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { TeamsService } from './teams.service';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
@@ -11,6 +11,9 @@ import { RemoveUserTeamDto } from './dto/removeUser.dto';
 import { AgendarCitaDto } from './dto/agendar-cita.dto';
 import { SecretariaService } from 'src/secretaria/secre.service';
 import { User } from 'src/users/entities/user.entity';
+import { BuscarDisponibilidadDto } from './dto/buscar-disponibilidad.dto';
+import { BuscarHorariosDisponiblesDto } from './dto/buscar-horarios-disponibles.dto';
+import { ActualizarEstadoCitaDto } from './dto/actualizar-E.dto';
 
 @Controller('citas')
 export class TeamsController {
@@ -19,6 +22,21 @@ export class TeamsController {
     private equipoRepository: Repository<Cita>,
     private readonly teamsService: TeamsService,
 ) {}
+
+@Post('buscarD')
+  async buscarDisponibilidad(@Body() buscarDisponibilidadDto: BuscarDisponibilidadDto) {
+    return this.teamsService.buscarDisponibilidad(buscarDisponibilidadDto);
+  }
+
+@Post('buscarH')
+async buscarHorariosDisponibles(@Body() buscarHorariosDisponiblesDto: BuscarHorariosDisponiblesDto) {
+  return this.teamsService.buscarHorariosDisponibles(buscarHorariosDisponiblesDto);
+}
+
+@Post('agendar')
+    agendarCita(@Body() agendarCitaDto: AgendarCitaDto) {
+        return this.teamsService.agendarCita(agendarCitaDto);
+  }
 
 
 @Get('todas')
@@ -36,8 +54,71 @@ async getAllCitas(@Request() req): Promise<Cita[]> {
         throw new NotFoundException('No se pudieron obtener las citas');
     }
 }
+
+@Get('pendientesU')
+@UseGuards(AuthGuard)
+async getAllCitasPendientesU(@Request() req): Promise<Cita[]> {
+    try {
+        // Obtén el email del usuario desde el token
+        const userEmail = req.user.email;
+
+        // Llama al servicio para obtener todas las citas asociadas con el email del usuario
+        const citas = await this.teamsService.getCitasPendienteUsuario(userEmail);
+        
+        return citas;
+    } catch (error) {
+        throw new NotFoundException('No se pudieron obtener las citas');
+    }
+}
+
+@Put(':id/estado')
+  async actualizarEstadoCita(
+    @Param('id') id: number,
+    @Body() actualizarEstadoCitaDto: ActualizarEstadoCitaDto,
+  ): Promise<Cita> {
+    try {
+      return await this.teamsService.actualizarEstadoCita(id, actualizarEstadoCitaDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+
+@Get('todasP')
+  @UseGuards(AuthGuard)
+  async getAllCitasP(@Request() req): Promise<Cita[]> {
+    try {
+      // Obtén el email del usuario desde el token
+      const userEmail = req.user.email;
+
+      // Llama al servicio para obtener todas las citas asociadas con el email del usuario
+      const citas = await this.teamsService.getAllCitasP(userEmail);
+      
+      return citas;
+    } catch (error) {
+      throw new NotFoundException('No se pudieron obtener las citas');
+    }
+  }
+
+  @Get('pendientes')
+  @UseGuards(AuthGuard)
+  async getAllCitasPendiente(@Request() req): Promise<Cita[]> {
+    try {
+      // Obtén el email del usuario desde el token
+      const userEmail = req.user.email;
+
+      // Llama al servicio para obtener todas las citas asociadas con el email del usuario
+      const citas = await this.teamsService.getCitasPendiente(userEmail);
+      
+      return citas;
+    } catch (error) {
+      throw new NotFoundException('No se pudieron obtener las citas');
+    }
+  }
+
+
   
-    @Post('agendar')
+    /*@Post('agendar')
     @UseGuards(AuthGuard)
     async agendarCita(@Body() agendarCitaDto: AgendarCitaDto): Promise<Cita> {
         try {
@@ -48,7 +129,7 @@ async getAllCitas(@Request() req): Promise<Cita[]> {
         } catch (error) {
             throw new NotFoundException('No se pudo agendar la cita');
         }
-    }
+    }*/
        
 
     
