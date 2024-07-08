@@ -33,6 +33,44 @@ export class AuthController {
       }
     }
 
+
+  @Patch(':id/editarperfilNS')
+  async editPNS(
+    @Param('id') userEmail: string,
+    @Body() @Body() editDto: EditDto,
+  ) {
+    try {
+      return await  this.authService.editarPerfil(userEmail, editDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Patch(':id/editarperfilProfNS')
+  async editProNS(
+    @Param('id') userEmail: string,
+    @Body() @Body() editDto: EditProfesionalDto,
+  ) {
+    try {
+      return await  this.authService.editarPerfilProf(userEmail, editDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Patch(':id/editarperfilSecNS')
+  async editSecNS(
+    @Param('id') userEmail: string,
+    @Body() @Body() editDto: EditSecretariaDTO,
+  ) {
+    try {
+      return await  this.authService.editarPerfilSecre(userEmail, editDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+
     @Patch('editarperfil/profesional')
     @UseGuards(AuthGuard)
     async editarPerfilProf(@Request() req, @Body() editDto: EditProfesionalDto) {

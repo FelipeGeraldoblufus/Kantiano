@@ -6,6 +6,7 @@ import { User } from 'src/users/entities/user.entity';
 
 import {CreateHorarioTrabajoDto } from './dto/Create-com-dto';
 import { Profesional } from 'src/profesional/entities/medic.entity';
+import { GetHorariosTrabajoDto } from './dto/getHorarios-dto';
 
 @Injectable()
 export class CommentService {
@@ -21,6 +22,7 @@ export class CommentService {
     const profesional = await this.profesionalRepository.findOne({
       where: { email: createHorarioTrabajoDto.emailDoctor },
     });
+
     if (!profesional) {
       throw new NotFoundException('Profesional no encontrado');
     }
@@ -32,18 +34,72 @@ export class CommentService {
     const endHour = this.convertToMinutes(horaFin);
 
     while (currentHour < endHour) {
-      const horario = new HorarioTrabajo();
-      horario.fecha = fecha;
-      horario.horaInicio = this.convertToTimeString(currentHour);
-      currentHour += 60; // Añadir 60 minutos para el siguiente intervalo
-      horario.horaFin = this.convertToTimeString(currentHour);
-      horario.profesional = profesional;
+      const horaInicioString = this.convertToTimeString(currentHour);
+      const horaFinString = this.convertToTimeString(currentHour + 60);
 
-      horarios.push(horario);
+      // Verificar si ya existe un horario en esta fecha y hora para el profesional
+      const horarioExistente = await this.horarioTrabajoRepository.findOne({
+        where: {
+          fecha,
+          horaInicio: horaInicioString,
+          profesional,
+        },
+      });
+
+      if (!horarioExistente) {
+        const horario = new HorarioTrabajo();
+        horario.fecha = fecha;
+        horario.horaInicio = horaInicioString;
+        horario.horaFin = horaFinString;
+        horario.profesional = profesional;
+
+        horarios.push(horario);
+      }
+
+      currentHour += 60; // Añadir 60 minutos para el siguiente intervalo
     }
 
     return this.horarioTrabajoRepository.save(horarios);
+}
+
+async getHorariosTrabajo(getHorariosTrabajoDto: GetHorariosTrabajoDto): Promise<HorarioTrabajo[]> {
+  const { emailDoctor } = getHorariosTrabajoDto;
+  
+  const profesional = await this.profesionalRepository.findOne({
+    where: { email: emailDoctor },
+  });
+
+  if (!profesional) {
+    throw new NotFoundException('Profesional no encontrado');
   }
+
+  return this.horarioTrabajoRepository.find({
+    where: { profesional },
+    order: { fecha: 'ASC', horaInicio: 'ASC' },
+  });
+}
+
+async eliminarHorario(emailDoctor: string, horarioId: number): Promise<void> {
+  const profesional = await this.profesionalRepository.findOne({
+    where: { email: emailDoctor },
+  });
+
+  if (!profesional) {
+    throw new NotFoundException('Profesional no encontrado');
+  }
+
+  const horario = await this.horarioTrabajoRepository.findOne({
+    where: { id: horarioId, profesional },
+  });
+
+  if (!horario) {
+    throw new NotFoundException('Horario no encontrado o no pertenece al profesional');
+  }
+
+  await this.horarioTrabajoRepository.remove(horario);
+}
+
+
 
   private convertToMinutes(time: string): number {
     const [hours, minutes] = time.split(':').map(Number);

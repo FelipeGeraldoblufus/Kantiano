@@ -14,6 +14,7 @@ import { User } from 'src/users/entities/user.entity';
 import { BuscarDisponibilidadDto } from './dto/buscar-disponibilidad.dto';
 import { BuscarHorariosDisponiblesDto } from './dto/buscar-horarios-disponibles.dto';
 import { ActualizarEstadoCitaDto } from './dto/actualizar-E.dto';
+import { EliminarCitaDto } from './dto/eliminarcita-dto';
 
 @Controller('citas')
 export class TeamsController {
@@ -36,6 +37,10 @@ async buscarHorariosDisponibles(@Body() buscarHorariosDisponiblesDto: BuscarHora
 @Post('agendar')
     agendarCita(@Body() agendarCitaDto: AgendarCitaDto) {
         return this.teamsService.agendarCita(agendarCitaDto);
+}
+@Delete('eliminar')
+  async eliminarCita(@Body() eliminarCitaDto: EliminarCitaDto) {
+    await this.teamsService.eliminarCita(eliminarCitaDto);
   }
 
 

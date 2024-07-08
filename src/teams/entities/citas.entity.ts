@@ -20,10 +20,10 @@ export class Cita {
   @Column()
   estado: string;
 
-  @ManyToOne(() => User, paciente => paciente.citas)
+  @ManyToOne(() => User, paciente => paciente.citas,  { onDelete: 'CASCADE' })
   paciente: User;
 
-  @ManyToOne(() => Profesional)
+  @ManyToOne(() => Profesional, profesional => profesional.citas, { onDelete: 'CASCADE' })
   profesional: Profesional;
 }
   

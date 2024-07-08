@@ -22,5 +22,5 @@ export class EditProfesionalDto{
 
     @IsOptional()
     @IsString()
-    email?: string;
+    password?: string;
 }

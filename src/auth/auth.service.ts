@@ -129,6 +129,14 @@ export class AuthService {
       if (editDto.tipoUsuario) {
         prof.tipoUsuario = editDto.tipoUsuario;
       }
+      if (editDto.password) {
+        const isPasswordHashed = await bcryptjs.compare(editDto.password, prof.password);
+        if (!isPasswordHashed) {
+          const hashedPassword = await bcryptjs.hash(editDto.password, 10);
+          editDto.password = hashedPassword;
+        }
+        prof.password = editDto.password;
+      }
   
       await this.profesionalService.updateProfProfile(prof);
     }

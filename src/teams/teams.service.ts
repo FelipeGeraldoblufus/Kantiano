@@ -14,6 +14,7 @@ import { AgendarCitaDto } from './dto/agendar-cita.dto';
 import { BuscarHorariosDisponiblesDto } from './dto/buscar-horarios-disponibles.dto';
 import { BuscarDisponibilidadDto } from './dto/buscar-disponibilidad.dto';
 import { ActualizarEstadoCitaDto } from './dto/actualizar-E.dto';
+import { EliminarCitaDto } from './dto/eliminarcita-dto';
 
 @Injectable()
 export class TeamsService {
@@ -185,50 +186,51 @@ export class TeamsService {
 
 
 
-  async buscarDisponibilidad(buscarDisponibilidadDto: BuscarDisponibilidadDto): Promise<any> {
-    const { especialidad, horarioPreferido } = buscarDisponibilidadDto;
+async buscarDisponibilidad(buscarDisponibilidadDto: BuscarDisponibilidadDto): Promise<any> {
+  const { especialidad, horarioPreferido } = buscarDisponibilidadDto;
 
-    // Buscar todos los profesionales que tienen la especialidad especificada
-    const profesionales = await this.profesionalRepository.find({ where: { especialidad } });
+  // Buscar todos los profesionales que tienen la especialidad especificada
+  const profesionales = await this.profesionalRepository.find({ where: { especialidad } });
 
-    if (profesionales.length === 0) {
-        throw new NotFoundException(`No se encontraron profesionales con la especialidad ${especialidad}`);
-    }
+  if (profesionales.length === 0) {
+      throw new NotFoundException(`No se encontraron profesionales con la especialidad ${especialidad}`);
+  }
 
-    // Obtener los horarios de trabajo de los profesionales y días no disponibles
-    const horariosTrabajo = await this.horarioRepository.find({
-        where: profesionales.map(profesional => ({ profesional })),
-    });
+  // Obtener los horarios de trabajo de los profesionales y días no disponibles
+  const horariosTrabajo = await this.horarioRepository.find({
+      where: profesionales.map(profesional => ({ profesional })),
+      relations: ['profesional'], // Asegúrate de cargar la relación profesional
+  });
 
-    const diasNoDisponibles = await this.diaNoDisponibleRepository.find({
-        where: profesionales.map(profesional => ({ profesional })),
-    });
+  const diasNoDisponibles = await this.diaNoDisponibleRepository.find({
+      where: profesionales.map(profesional => ({ profesional })),
+      relations: ['profesional'], // Asegúrate de cargar la relación profesional
+  });
 
-    const citas = await this.citaRepository.find();
+  const citas = await this.citaRepository.find({ relations: ['profesional'] });
 
-    // Utilizar un conjunto para almacenar fechas únicas disponibles
-    const fechasDisponiblesSet = new Set<string>();
+  // Utilizar un conjunto para almacenar fechas únicas disponibles
+  const fechasDisponiblesSet = new Set<string>();
 
-    // Iterar sobre los horarios de trabajo y filtrar por horario preferido
-    horariosTrabajo.forEach(horario => {
-        const diaNoDisponible = diasNoDisponibles.find(dia => dia.fecha === horario.fecha && dia.profesional.id === horario.profesional.id);
-        const citaExistente = citas.find(cita => cita.fecha === horario.fecha && cita.hora === horario.horaInicio && cita.profesional.id === horario.profesional.id);
+  // Iterar sobre los horarios de trabajo y filtrar por horario preferido
+  horariosTrabajo.forEach(horario => {
+      const diaNoDisponible = diasNoDisponibles.find(dia => dia.fecha === horario.fecha && dia.profesional && dia.profesional.id === horario.profesional.id);
+      const citaExistente = citas.find(cita => cita.fecha === horario.fecha && cita.hora === horario.horaInicio && cita.profesional && cita.profesional.id === horario.profesional.id);
 
-        // Filtrar por horario preferido
-        const esMañana = horarioPreferido === 'mañana' && horario.horaInicio >= '09:00' && horario.horaInicio < '12:00';
-        const esTarde = horarioPreferido === 'tarde' && horario.horaInicio >= '13:00' && horario.horaInicio < '17:00';
+      // Filtrar por horario preferido
+      const esMañana = horarioPreferido === 'mañana' && horario.horaInicio >= '09:00' && horario.horaInicio < '12:00';
+      const esTarde = horarioPreferido === 'tarde' && horario.horaInicio >= '13:00' && horario.horaInicio < '17:00';
 
-        if (!diaNoDisponible && !citaExistente && (esMañana || esTarde)) {
-            fechasDisponiblesSet.add(horario.fecha);
-        }
-    });
+      if (!diaNoDisponible && !citaExistente && (esMañana || esTarde)) {
+          fechasDisponiblesSet.add(horario.fecha);
+      }
+  });
 
-    // Convertir el conjunto a un array y devolverlo como resultado
-    const fechasDisponibles = Array.from(fechasDisponiblesSet);
+  // Convertir el conjunto a un array y devolverlo como resultado
+  const fechasDisponibles = Array.from(fechasDisponiblesSet);
 
-    return { fechasDisponibles };
+  return { fechasDisponibles };
 }
-  
 async agendarCita(agendarCitaDto: AgendarCitaDto): Promise<Cita> {
   const { fecha, hora, tipoReserva, estado, pacienteEmail, profesionalEmail } = agendarCitaDto;
 
@@ -270,11 +272,28 @@ async agendarCita(agendarCitaDto: AgendarCitaDto): Promise<Cita> {
   return this.citaRepository.save(cita);
 }
 
+async eliminarCita(eliminarCitaDto: EliminarCitaDto): Promise<void> {
+  const { fecha, hora, pacienteEmail, profesionalEmail } = eliminarCitaDto;
 
-  
+  const paciente = await this.usuarioRepository.findOne({ where: { email: pacienteEmail } });
+  if (!paciente) {
+    throw new NotFoundException(`Paciente con email ${pacienteEmail} no encontrado`);
+  }
 
+  const profesional = await this.profesionalRepository.findOne({ where: { email: profesionalEmail } });
+  if (!profesional) {
+    throw new NotFoundException(`Profesional con email ${profesionalEmail} no encontrado`);
+  }
 
- 
+  const cita = await this.citaRepository.findOne({ where: { fecha, hora, paciente, profesional } });
+  if (!cita) {
+    throw new NotFoundException(`No se encontró una cita para el paciente ${pacienteEmail} con el profesional ${profesionalEmail} en la fecha ${fecha} a las ${hora}`);
+  }
+
+  // Eliminar la cita
+  await this.citaRepository.remove(cita);
+}
+
   
 }
 
