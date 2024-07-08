@@ -2,15 +2,16 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ComController } from './com.controller';
 import { CommentService } from './com.service';
-import { Comentario } from './entities/com.entity';
-import { Proyecto } from 'src/projects/entities/projects.entity'; // Asegúrate de importar la entidad del proyecto
-import { Equipo } from 'src/teams/entities/team.entity';
+import { HorarioTrabajo } from './entities/horario.entity';
+
+import { Cita } from 'src/teams/entities/citas.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Task } from 'src/task/entities/task.entity';
+import { Profesional } from 'src/profesional/entities/medic.entity';
+import { ProfesionalService } from 'src/profesional/prof.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Comentario,Task, Proyecto, Equipo, User])],
+  imports: [TypeOrmModule.forFeature([HorarioTrabajo, Cita, User, Profesional])],
   controllers: [ComController],
-  providers: [CommentService],
+  providers: [CommentService,ProfesionalService],
 })
 export class CommentModule {}

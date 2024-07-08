@@ -1,182 +1,299 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getConnection, getRepository } from 'typeorm';
-import { Equipo } from './entities/team.entity'; // Suponemos que tienes una entidad Equipo
+import { CommonEvents, Repository, getConnection, getRepository } from 'typeorm';
+import { Cita } from './entities/citas.entity'; // Suponemos que tienes una entidad Equipo
 import { CreateTeamDto } from './dto/create-team.dto';
 import { User } from 'src/users/entities/user.entity';
 import { AddUserTeamDto } from './dto/adduser-team.dto';
 import { EditTeamDto } from './dto/edit-team.dto';
 import { RemoveUserTeamDto } from './dto/removeUser.dto';
+import { Profesional } from 'src/profesional/entities/medic.entity';
+import { DiaNoDisponible } from 'src/Daysnot/entities/day.entity';
+import { HorarioTrabajo } from 'src/comment/entities/horario.entity'; 
+import { AgendarCitaDto } from './dto/agendar-cita.dto';
+import { BuscarHorariosDisponiblesDto } from './dto/buscar-horarios-disponibles.dto';
+import { BuscarDisponibilidadDto } from './dto/buscar-disponibilidad.dto';
+import { ActualizarEstadoCitaDto } from './dto/actualizar-E.dto';
+import { EliminarCitaDto } from './dto/eliminarcita-dto';
 
 @Injectable()
 export class TeamsService {
   constructor(
-    @InjectRepository(Equipo)
-    private readonly equipoRepository: Repository<Equipo>,
+    @InjectRepository(Cita)
+    private readonly citaRepository: Repository<Cita>,
     @InjectRepository(User) // Inyecta el repositorio de usuarios
     private readonly usuarioRepository: Repository<User>,
+    @InjectRepository(Profesional)
+    private readonly profesionalRepository: Repository<Profesional>,
+    @InjectRepository(HorarioTrabajo)
+    private readonly horarioRepository: Repository<HorarioTrabajo>,
+    @InjectRepository(DiaNoDisponible)
+    private readonly diaNoDisponibleRepository: Repository<DiaNoDisponible>,
   
   ) {}
 
-  async getAllTeams(email: string): Promise<Equipo[]> {
-    const equipos = await this.equipoRepository
-      .createQueryBuilder('equipo')
-      .leftJoin('equipo.creador', 'creador')
-      .where('creador.email = :email', { email })
+  async getAllCitas(email: string):  Promise<Cita[]> {
+    
+    const user = await this.usuarioRepository
+        .createQueryBuilder('user')
+      .leftJoinAndSelect('user.citas', 'cita')
+      .leftJoinAndSelect('cita.profesional', 'profesional')
+      .where('user.email = :email', { email })
+      .getOne();
+      if (user) {
+        return user.citas; // Retorna solo la propiedad 'citas' del usuario
+      } else {
+        return []; // Si el usuario no tiene citas, retornamos un array vacío
+      }
+  }
+
+
+  async getAllCitasP(email: string): Promise<Cita[]> {
+    const profesional = await this.profesionalRepository
+      .createQueryBuilder('profesional')
+      .leftJoinAndSelect('profesional.citas', 'cita')
+      .where('profesional.email = :email', { email })
+      .getOne();
+
+    if (profesional && profesional.citas) {
+      return profesional.citas; // Retorna solo la propiedad 'citas' del profesional
+    } else {
+      throw new NotFoundException('No se encontraron citas para este profesional');
+    }
+  }
+
+  async getCitasPendiente(email: string): Promise<Cita[]> {
+    const citas = await this.citaRepository
+      .createQueryBuilder('cita')
+      .leftJoinAndSelect('cita.profesional', 'profesional')
+      .where('profesional.email = :email', { email })
+      .andWhere('cita.estado = :estado', { estado: 'Pendiente' })
       .getMany();
-    return equipos;
+
+    if (citas.length > 0) {
+      return citas;
+    } else {
+      throw new NotFoundException('No se encontraron citas finalizadas para este profesional');
+    }
   }
 
+  async getCitasPendienteUsuario(email: string): Promise<Cita[]> {
+    const citas = await this.citaRepository
+      .createQueryBuilder('cita')
+      .leftJoinAndSelect('cita.paciente', 'user')
+      .where('user.email = :email', { email })
+      .andWhere('cita.estado = :estado', { estado: 'Pendiente' })
+      .getMany();
 
-
-async editarEquipo(userEmail: string, editTeamDto: EditTeamDto, equipoId: number): Promise<Equipo> {
-  try {
-    // Busca al usuario por su correo electrónico
-    const usuario = await this.usuarioRepository.findOne({ where: { email: userEmail } });
-
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
+    if (citas.length > 0) {
+      return citas;
+    } else {
+      throw new NotFoundException('No se encontraron citas finalizadas para este paciente');
     }
-
-    // Verifica que el equipo exista
-    const equipo = await this.equipoRepository.findOne({ where: { id: equipoId } });
-
-    if (!equipo) {
-      throw new NotFoundException('Equipo no encontrado');
-    }
-
-    // Actualiza los campos del equipo con los valores del DTO
-    equipo.nombre = editTeamDto.nombre;
-    equipo.descripcion = editTeamDto.descripcion;
-
-    // Guarda los cambios en la base de datos
-    await this.equipoRepository.save(equipo);
-
-    return equipo;
-  } catch (error) {
-    throw new BadRequestException('No se pudo actualizar el equipo', error.message);
   }
+
+  async actualizarEstadoCita(id: number, actualizarEstadoCitaDto: ActualizarEstadoCitaDto): Promise<Cita> {
+    const { estado } = actualizarEstadoCitaDto;
+
+    const cita = await this.citaRepository.findOne({ where: { id }, relations: ['profesional'] });
+
+    if (!cita) {
+        throw new NotFoundException(`Cita con ID ${id} no encontrada`);
+    }
+// Actualizar el estado de la cita
+    cita.estado = estado;
+
+    // Guardar los cambios en la base de datos
+    return await this.citaRepository.save(cita);
+    } catch (error) {
+    // Manejar cualquier error que pueda ocurrir durante la búsqueda o actualización
+    throw new Error(`Error al actualizar la cita: ${error.message}`);
+  }
+
+  
+
+  async findAll(): Promise<Cita[]> {
+    return this.citaRepository.find({ relations: ['paciente', 'profesional'] });
+  }
+
+  async buscarHorariosDisponibles(buscarHorariosDisponiblesDto: BuscarHorariosDisponiblesDto): Promise<any> {
+    const { especialidad, horarioPreferido, fechaSeleccionada } = buscarHorariosDisponiblesDto;
+
+    try {
+        console.log(`Buscando horarios disponibles para especialidad: ${especialidad}, horarioPreferido: ${horarioPreferido}, fechaSeleccionada: ${fechaSeleccionada}`);
+
+        const profesionales = await this.profesionalRepository.find({ where: { especialidad } });
+        console.log('Profesionales encontrados:', profesionales);
+
+        if (profesionales.length === 0) {
+            throw new NotFoundException(`No se encontraron profesionales con la especialidad ${especialidad}`);
+        }
+
+        const horarios = await this.horarioRepository.find({
+          where: [
+              ...profesionales.map(profesional => ({
+                  profesional,
+                  fecha: fechaSeleccionada,
+              })),
+          ],
+          relations: ['profesional'], // Cargar la relación profesional
+      });
+        console.log('Horarios de trabajo encontrados:', horarios);
+
+        const diasNoDisponibles = await this.diaNoDisponibleRepository.find({
+            where: [
+                ...profesionales.map(profesional => ({
+                    profesional,
+                    fecha: fechaSeleccionada,
+                })),
+            ],
+        });
+        console.log('Días no disponibles encontrados:', diasNoDisponibles);
+
+        const citas = await this.citaRepository.find({
+            where: { fecha: fechaSeleccionada },
+            relations: ['profesional']
+        });
+        console.log('Citas encontradas:', citas);
+
+        const horariosDisponibles = horarios.filter(horario => {
+            const diaNoDisponible = diasNoDisponibles.find(dia => dia.profesional.id === horario.profesional.id);
+            const citaExistente = citas.find(cita => cita.hora === horario.horaInicio && cita.profesional.id === horario.profesional.id);
+
+            const esMañana = horarioPreferido === 'mañana' && horario.horaInicio >= '09:00' && horario.horaInicio < '12:00';
+            const esTarde = horarioPreferido === 'tarde' && horario.horaInicio >= '13:00' && horario.horaInicio < '17:00';
+
+            console.log(`Horario: ${horario.horaInicio} - Profesional: ${horario.profesional ? horario.profesional.nombre : 'N/A'}`);
+            
+            return !diaNoDisponible && !citaExistente && (esMañana || esTarde);
+        }).map(horario => ({
+            hora: horario.horaInicio,
+            doctor: horario.profesional ? `${horario.profesional.nombre} ${horario.profesional.apellido}` : 'Profesional no disponible',
+            email: horario.profesional ? `${horario.profesional.email}` : 'Email no disponible'
+        }));
+
+        console.log('Horarios disponibles:', horariosDisponibles);
+
+        return {
+            fechaSeleccionada,
+            horariosDisponibles,
+        };
+    } catch (error) {
+        console.error('Error al buscar horarios disponibles:', error);
+        throw new InternalServerErrorException('Error al buscar horarios disponibles');
+    }
 }
 
 
-  async createTeam(creadorId: number, name: string, description: string): Promise<Equipo> {
-    const creador = await this.usuarioRepository.findOne({
-      where: { id: creadorId }, // Busca al usuario por su ID
-    });
 
-    if (!creador) {
-      throw new Error('Usuario no encontrado'); // Puedes personalizar el mensaje de error
-    }
+async buscarDisponibilidad(buscarDisponibilidadDto: BuscarDisponibilidadDto): Promise<any> {
+  const { especialidad, horarioPreferido } = buscarDisponibilidadDto;
 
-    const equipo = this.equipoRepository.create({
-      creador: creador,
-      nombre: name,
-      descripcion: description,
-      miembros: [creador], // Agregar el creador a la lista de miembros
-    });
+  // Buscar todos los profesionales que tienen la especialidad especificada
+  const profesionales = await this.profesionalRepository.find({ where: { especialidad } });
 
-    return this.equipoRepository.save(equipo);
-  }
-  
-  async addMember(userId: number, addUserDto: AddUserTeamDto): Promise<Equipo> {
-    const usuario = await this.usuarioRepository.findOne({ where: { id: userId } });
-
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const { teamName, email } = addUserDto;
-
-    const team: Equipo = await this.equipoRepository.findOne({
-      where: { nombre: teamName },
-      relations: ['miembros', 'creador'],
-    });
-
-    const user = await this.usuarioRepository.findOne({ where: { email } });
-
-    if (!team || !user) {
-      throw new Error('Equipo o usuario no encontrado');
-    }
-
-    // Verifica si el creador está definido y si ya está en la lista de miembros
-    const creadorEnLista = team?.creador?.id && team.miembros?.some((miembro) => miembro.id === team.creador.id);
-
-    if (!creadorEnLista && team?.creador) {
-      // Si el creador no está en la lista y está definido, agrégalo
-      team.miembros.push(team.creador);
-    }
-
-    // Verifica si el nuevo usuario ya está en la lista de miembros
-    const usuarioEnLista = user && team.miembros?.some((miembro) => miembro.id === user.id);
-
-    if (!usuarioEnLista && user) {
-      // Si el nuevo usuario no está en la lista y está definido, agrégalo
-      team.miembros.push(user);
-    }
-
-    return await this.equipoRepository.save(team);
-  }
-  
-  async removeMember(removeUserDto: RemoveUserTeamDto) {
-
-
-    
-    const { teamId, email } = removeUserDto;
-
-    const team = await this.equipoRepository.findOne({
-      where: { id: teamId },
-      relations: ['miembros'],
-    });
-
-    if (!team) {
-      throw new NotFoundException('Equipo no encontrado');
-    }
-
-    const user = await this.usuarioRepository.findOne({ where: { email } });
-
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    // Verifica si el usuario está en la lista de miembros
-    const usuarioEnListaIndex = user && team.miembros?.findIndex((miembro) => miembro.id === user.id);
-
-    if (usuarioEnListaIndex !== undefined && usuarioEnListaIndex !== -1) {
-      // Si el usuario está en la lista, elimínalo
-      team.miembros.splice(usuarioEnListaIndex, 1);
-      await this.equipoRepository.save(team);
-      return { message: 'Usuario removido exitosamente del equipo' };
-    } else {
-      throw new NotFoundException('Usuario no encontrado en la lista de miembros del equipo');
-    }
+  if (profesionales.length === 0) {
+      throw new NotFoundException(`No se encontraron profesionales con la especialidad ${especialidad}`);
   }
 
- 
-  async deleteTeamByName(name: string): Promise<string> {
-    const team = await this.equipoRepository.findOne({ where: { nombre: name } });
-    if (!team) {
-      throw new NotFoundException('Team not found');
-    }
-  
-    // Utiliza 'miembros' en lugar de 'Team'
-    await this.equipoRepository
-      .createQueryBuilder()
-      .relation('miembros')
-      .of(team)
-      .remove(team.miembros);
-  
-    // Remove the team
-    await this.equipoRepository.remove(team);
-  
-    return `Team "${name}" and its relations have been deleted successfully`;
+  // Obtener los horarios de trabajo de los profesionales y días no disponibles
+  const horariosTrabajo = await this.horarioRepository.find({
+      where: profesionales.map(profesional => ({ profesional })),
+      relations: ['profesional'], // Asegúrate de cargar la relación profesional
+  });
+
+  const diasNoDisponibles = await this.diaNoDisponibleRepository.find({
+      where: profesionales.map(profesional => ({ profesional })),
+      relations: ['profesional'], // Asegúrate de cargar la relación profesional
+  });
+
+  const citas = await this.citaRepository.find({ relations: ['profesional'] });
+
+  // Utilizar un conjunto para almacenar fechas únicas disponibles
+  const fechasDisponiblesSet = new Set<string>();
+
+  // Iterar sobre los horarios de trabajo y filtrar por horario preferido
+  horariosTrabajo.forEach(horario => {
+      const diaNoDisponible = diasNoDisponibles.find(dia => dia.fecha === horario.fecha && dia.profesional && dia.profesional.id === horario.profesional.id);
+      const citaExistente = citas.find(cita => cita.fecha === horario.fecha && cita.hora === horario.horaInicio && cita.profesional && cita.profesional.id === horario.profesional.id);
+
+      // Filtrar por horario preferido
+      const esMañana = horarioPreferido === 'mañana' && horario.horaInicio >= '09:00' && horario.horaInicio < '12:00';
+      const esTarde = horarioPreferido === 'tarde' && horario.horaInicio >= '13:00' && horario.horaInicio < '17:00';
+
+      if (!diaNoDisponible && !citaExistente && (esMañana || esTarde)) {
+          fechasDisponiblesSet.add(horario.fecha);
+      }
+  });
+
+  // Convertir el conjunto a un array y devolverlo como resultado
+  const fechasDisponibles = Array.from(fechasDisponiblesSet);
+
+  return { fechasDisponibles };
+}
+async agendarCita(agendarCitaDto: AgendarCitaDto): Promise<Cita> {
+  const { fecha, hora, tipoReserva, estado, pacienteEmail, profesionalEmail } = agendarCitaDto;
+
+  const paciente = await this.usuarioRepository.findOne({ where: { email: pacienteEmail } });
+  if (!paciente) {
+      throw new NotFoundException(`Paciente con email ${pacienteEmail} no encontrado`);
   }
 
-
-  findOneByName(nombre: string) {
-    return this.equipoRepository.findOneBy({ nombre })
+  const profesional = await this.profesionalRepository.findOne({ where: { email: profesionalEmail } });
+  if (!profesional) {
+      throw new NotFoundException(`Profesional con email ${profesionalEmail} no encontrado`);
   }
- 
-  
+
+  const citaExistente = await this.citaRepository.findOne({ where: { fecha, hora, profesional } });
+  if (citaExistente) {
+      throw new ConflictException(`El horario ${hora} del ${fecha} ya está reservado para el profesional ${profesional.nombre} ${profesional.apellido}`);
+  }
+
+  const diaNoDisponible = await this.diaNoDisponibleRepository.findOne({ where: { fecha, profesional } });
+  if (diaNoDisponible) {
+      throw new ConflictException(`El profesional ${profesional.nombre} ${profesional.apellido} no está disponible el ${fecha}`);
+  }
+
+  const nuevoHorarioTrabajo = await this.horarioRepository.findOne({
+      where: { fecha, horaInicio: hora, profesional }
+  });
+  if (!nuevoHorarioTrabajo) {
+      throw new ConflictException(`El profesional ${profesional.nombre} ${profesional.apellido} no tiene un horario de trabajo definido para el ${fecha} a las ${hora}`);
+  }
+
+  const cita = new Cita();
+  cita.fecha = fecha;
+  cita.hora = hora;
+  cita.tipoReserva = tipoReserva;
+  cita.estado = estado;
+  cita.paciente = paciente;
+  cita.profesional = profesional;
+
+  return this.citaRepository.save(cita);
+}
+
+async eliminarCita(eliminarCitaDto: EliminarCitaDto): Promise<void> {
+  const { fecha, hora, pacienteEmail, profesionalEmail } = eliminarCitaDto;
+
+  const paciente = await this.usuarioRepository.findOne({ where: { email: pacienteEmail } });
+  if (!paciente) {
+    throw new NotFoundException(`Paciente con email ${pacienteEmail} no encontrado`);
+  }
+
+  const profesional = await this.profesionalRepository.findOne({ where: { email: profesionalEmail } });
+  if (!profesional) {
+    throw new NotFoundException(`Profesional con email ${profesionalEmail} no encontrado`);
+  }
+
+  const cita = await this.citaRepository.findOne({ where: { fecha, hora, paciente, profesional } });
+  if (!cita) {
+    throw new NotFoundException(`No se encontró una cita para el paciente ${pacienteEmail} con el profesional ${profesionalEmail} en la fecha ${fecha} a las ${hora}`);
+  }
+
+  // Eliminar la cita
+  await this.citaRepository.remove(cita);
+}
+
   
 }
 

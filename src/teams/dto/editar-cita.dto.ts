@@ -1,8 +1,6 @@
-// edit-team.dto.ts
-
 import { IsString, MinLength } from 'class-validator';
 
-export class EditTeamDto {
+export class EditCitaDto {
   @IsString()
   estado: string;
 }

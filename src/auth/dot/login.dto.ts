@@ -8,12 +8,13 @@ export class LoginDto{
     @IsEmail()
     email: string;
 
-
     @Transform(({value}) => value.trim())
     @IsString()
     @MinLength(6)
     password: string;
 
+    @IsString()
+    userType: string;
 
-
+    
 }

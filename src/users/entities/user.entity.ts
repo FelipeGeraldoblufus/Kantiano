@@ -1,17 +1,14 @@
-import { Exclude } from "class-transformer";
-import { Proyecto } from "src/projects/entities/projects.entity";
-import { Equipo } from "src/teams/entities/team.entity";
-import { Column, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Cita } from 'src/teams/entities/citas.entity';
 
 
 @Entity()
 export class User {
-
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    name: string;
+    nombre: string;
 
     @Column({ unique: true, nullable: false })
     email: string;
@@ -19,19 +16,24 @@ export class User {
     @Column({ nullable: false })
     password: string;
 
-    
-    @Exclude()
-    equiposCreados: Equipo[];
-
-    @Exclude()
-    @OneToMany(() => Proyecto, proyecto => proyecto.creador)
-    proyectosCreados: Proyecto[];
+    @Column()
+    apellido: string;
 
     @Column()
-    rol: string;
+    edad: number;
 
-    @DeleteDateColumn()
-    deletedAt: Date;
+    @Column()
+    direccion: string;
 
+    @Column()
+    rut: string;
 
+    @Column()
+    seguroMedico: string;
+
+    @OneToMany(() => Cita, cita => cita.paciente)
+    citas: Cita[];
+
+    @Column()
+    tipoUsuario: string;
 }

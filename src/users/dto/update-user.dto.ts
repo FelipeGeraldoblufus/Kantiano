@@ -1,13 +1,53 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import { IsString, MinLength } from 'class-validator';
+import { IsInt, IsOptional, IsString, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
 
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
     @IsString()
-    @Transform(({value}) => value.trim()) //limpia caracteres en blanco
+    @MinLength(1)
+    nombre?: string;
+  
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    apellido?: string;
+  
+    @IsOptional()
+    @IsInt()
+    edad?: number;
+  
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    direccion?: string;
+  
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    rut?: string;
+  
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    seguroMedico?: string;
+  
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
     @MinLength(6)
-    password: string;
-
+    password?: string;
+  
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    tipoUsuario?: string;
 }
+

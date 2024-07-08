@@ -5,8 +5,12 @@ import { LoginDto } from './dot/login.dto';
 import { AuthGuard } from './guard/auth.guard';
 import { ResetPassDto } from './dot/resetPass.dto';
 import { EditDto } from './dot/editperfil.dto';
+import { RegisterProfesionalDto } from './dot/registerMed.dto';
+import { RegisterSecretariaDto } from './dot/registerSec.dto';
+import { EditProfesionalDto } from './dot/editprof.dto';
+import { EditSecretariaDTO } from './dot/editsecre.dto';
 
-@Controller('auth')
+@Controller('auth')  
 export class AuthController {
 
     constructor(private readonly authService: AuthService
@@ -28,8 +32,79 @@ export class AuthController {
         throw new NotFoundException(`No se pudieron editar el perfil del usuario`);
       }
     }
-    
 
+
+  @Patch(':id/editarperfilNS')
+  async editPNS(
+    @Param('id') userEmail: string,
+    @Body() @Body() editDto: EditDto,
+  ) {
+    try {
+      return await  this.authService.editarPerfil(userEmail, editDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Patch(':id/editarperfilProfNS')
+  async editProNS(
+    @Param('id') userEmail: string,
+    @Body() @Body() editDto: EditProfesionalDto,
+  ) {
+    try {
+      return await  this.authService.editarPerfilProf(userEmail, editDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Patch(':id/editarperfilSecNS')
+  async editSecNS(
+    @Param('id') userEmail: string,
+    @Body() @Body() editDto: EditSecretariaDTO,
+  ) {
+    try {
+      return await  this.authService.editarPerfilSecre(userEmail, editDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+
+    @Patch('editarperfil/profesional')
+    @UseGuards(AuthGuard)
+    async editarPerfilProf(@Request() req, @Body() editDto: EditProfesionalDto) {
+      const userEmail = req.user.email; // Email del usuario autenticado
+      const userRole = req.user.tipoUsuario; // Tipo de usuario autenticado
+  
+      console.log('Usuario autenticado:', userEmail, 'Tipo de usuario:', userRole);
+  
+      if (userRole === 'secretaria' || req.user.email === userEmail) {
+        try {
+          await this.authService.editarPerfilProf(userEmail, editDto);
+          return { message: 'Perfil actualizado exitosamente' };
+        } catch (error) {
+          throw new BadRequestException(`No se pudo editar el perfil del profesional: ${error.message}`);
+        }
+      } else {
+        throw new NotFoundException('No tienes permiso para editar este perfil');
+      }
+    }
+
+    @Patch('editarperfil/secretaria')
+  @UseGuards(AuthGuard)
+  async editarPerfilSecre(@Request() req, @Body() editDto: EditSecretariaDTO) {
+    const userEmail = req.user.email; // Email del usuario autenticado
+    console.log('Usuario autenticado:', userEmail);
+
+    try {
+      await this.authService.editarPerfilSecre(userEmail, editDto);
+      return { message: 'Perfil actualizado exitosamente' };
+    } catch (error) {
+      throw new NotFoundException(`No se pudo editar el perfil de la secretaria: ${error.message}`);
+    }
+  }
+    
 
     @Post("register")
     register(
@@ -38,6 +113,30 @@ export class AuthController {
     ) {
         
         try{return this.authService.register(registerDto);
+        }catch (error) {
+            throw new NotFoundException(`No se pudieron registrar el usuario`);
+          }
+    }
+
+    @Post("Mregister")
+    registerM(
+        @Body()
+        registerDto: RegisterProfesionalDto
+    ) {
+        
+        try{return this.authService.registerProfesional(registerDto);
+        }catch (error) {
+            throw new NotFoundException(`No se pudieron registrar el usuario`);
+          }
+    }
+
+    @Post("Sregister")
+    registerS(
+        @Body()
+        registerDto: RegisterSecretariaDto
+    ) {
+        
+        try{return this.authService.registerSecretaria(registerDto);
         }catch (error) {
             throw new NotFoundException(`No se pudieron registrar el usuario`);
           }
@@ -52,6 +151,20 @@ export class AuthController {
     ) {
         try{
             return this.authService.login(logindto);
+
+        }catch (error) {
+            throw new NotFoundException(`Fallo al inicio de sesion`);
+          }
+    }
+
+    @Post("Dlogin")
+    dlogin(
+        @Body()
+        logindto: LoginDto, 
+
+    ) {
+        try{
+            return this.authService.logindinamico(logindto);
 
         }catch (error) {
             throw new NotFoundException(`Fallo al inicio de sesion`);

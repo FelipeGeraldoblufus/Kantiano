@@ -1,5 +1,0 @@
-export enum STATUS_TASK {
-    PENDING = "PENDIENTE",
-    IN_PROGRESS = "EN PROGRESO",
-    FINISH = "TERMINADO",
-}

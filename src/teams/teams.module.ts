@@ -3,12 +3,17 @@ import { TeamsService } from './teams.service';
 import { TeamsController } from './teams.controller';
 import { UsersModule } from 'src/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Equipo } from './entities/team.entity';
+import { Cita } from './entities/citas.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Profesional } from 'src/profesional/entities/medic.entity';
+import { Secretaria } from 'src/secretaria/entities/secre.entity';
+import { DiaNoDisponible } from 'src/Daysnot/entities/day.entity';
+import { HorarioTrabajo } from 'src/comment/entities/horario.entity';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Equipo, User])],
+    TypeOrmModule.forFeature([Cita, User, Profesional, Secretaria, DiaNoDisponible, HorarioTrabajo])],
   providers: [TeamsService],
   controllers: [TeamsController]
 })

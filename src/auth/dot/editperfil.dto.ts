@@ -1,28 +1,55 @@
-import { IsEmail, IsString, MinLength } from "class-validator";
+import { IsEmail, IsInt, IsOptional, IsString, MinLength } from "class-validator";
 import { Transform } from "class-transformer";
 
 
 export class EditDto{
 
 
-    @Transform(({value}) => value.trim())
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
     @IsString()
     @MinLength(1)
-    name: string;
+    nombre?: string;
 
-    @Transform(({value}) => value.trim())
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    apellido?: string;
+
+    @IsOptional()
+    @IsInt()
+    edad?: number;
+
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    direccion?: string;
+
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    rut?: string;
+
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
+    @IsString()
+    @MinLength(1)
+    seguroMedico?: string;
+
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
     @IsString()
     @MinLength(6)
-    password: string;
+    password?: string;
 
-
-
+    @IsOptional()
+    @Transform(({ value }) => value.trim())
     @IsString()
-    @Transform(({value}) => value.trim())
-    rol: string;
-
-
-
-
-
+    tipoUsuario?: string;
 }
+
+
+
