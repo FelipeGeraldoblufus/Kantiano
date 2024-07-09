@@ -15,6 +15,7 @@ import { BuscarHorariosDisponiblesDto } from './dto/buscar-horarios-disponibles.
 import { BuscarDisponibilidadDto } from './dto/buscar-disponibilidad.dto';
 import { ActualizarEstadoCitaDto } from './dto/actualizar-E.dto';
 import { EliminarCitaDto } from './dto/eliminarcita-dto';
+import { MailerService } from 'src/mailer/mailer.service';
 
 @Injectable()
 export class TeamsService {
@@ -29,6 +30,7 @@ export class TeamsService {
     private readonly horarioRepository: Repository<HorarioTrabajo>,
     @InjectRepository(DiaNoDisponible)
     private readonly diaNoDisponibleRepository: Repository<DiaNoDisponible>,
+    private readonly mailerService: MailerService,
   
   ) {}
 
@@ -269,7 +271,16 @@ async agendarCita(agendarCitaDto: AgendarCitaDto): Promise<Cita> {
   cita.paciente = paciente;
   cita.profesional = profesional;
 
-  return this.citaRepository.save(cita);
+  await this.citaRepository.save(cita);
+
+    // Enviar el correo electrónico
+    const subject = 'Confirmación de Cita Médica';
+    const text = `Estimado ${paciente.nombre} ${paciente.apellido},\n\nSu cita con el Dr. ${profesional.nombre} ${profesional.apellido} ha sido agendada para el ${fecha} a las ${hora}.\n\nGracias por confiar en nuestros servicios.`;
+
+    await this.mailerService.sendEmail(pacienteEmail, subject, text);
+
+    return cita;
+    
 }
 
 async eliminarCita(eliminarCitaDto: EliminarCitaDto): Promise<void> {
