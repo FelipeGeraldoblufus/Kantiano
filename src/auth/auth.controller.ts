@@ -9,7 +9,7 @@ import { RegisterProfesionalDto } from './dot/registerMed.dto';
 import { RegisterSecretariaDto } from './dot/registerSec.dto';
 import { EditProfesionalDto } from './dot/editprof.dto';
 import { EditSecretariaDTO } from './dot/editsecre.dto';
-
+//hola
 @Controller('auth')  
 export class AuthController {
 
